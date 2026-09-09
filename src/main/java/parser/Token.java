@@ -56,10 +56,10 @@ public sealed interface Token {
      * Represents a reserved keyword.
      *
      * @param start Beginning index in the class definition
-     * @param str   Keyword itself
+     * @param kind  Keyword itself
      * @see KeywordKind
      */
-    record Keyword(int start, KeywordKind str) implements Token {}
+    record Keyword(int start, KeywordKind kind) implements Token {}
     
     /**
      * Represents a special character.
