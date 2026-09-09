@@ -90,6 +90,14 @@ public sealed interface Token {
                                      .map(kind -> new Symbol(start, kind));
         }
         
+        /**
+         * Returns a keyword token if the given word is a reserved keyword.
+         *
+         * @param word to be checked
+         * @return a keyword token or the word given.
+         * @see Token.Word
+         * @see Token.KeywordKind
+         */
         public static Token classifyWord(Word word) {
             for (KeywordKind kk : KEYWORD_KIND_LIST) {
                 if (kk.text().equals(word.str)) {
