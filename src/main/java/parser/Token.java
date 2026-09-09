@@ -120,7 +120,11 @@ public sealed interface Token {
     
     }
     
-    class Mapper {
+    final class Mapper {
+        private Mapper() {
+            throw new UnsupportedOperationException("Don't instantiate Mapper");
+        }
+        
         private static final List<KeywordKind> KEYWORD_KIND_LIST;
         private static final java.util.Map<Character, SymbolKind> BY_CHAR;
         
