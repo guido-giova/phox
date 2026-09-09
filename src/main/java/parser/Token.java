@@ -13,7 +13,7 @@ public sealed interface Token {
     record Whitespace(int start, String str) implements Token {}
     record StringLiteral(int start, String str) implements Token {}
     record Comment(int start, String str) implements Token {}
-    record Keyword(int start, String str) implements Token {}
+    record Keyword(int start, KeywordKind str) implements Token {}
     record Symbol(SymbolKind kind, int start) implements Token {
         char symbol() { return kind.ch; }
     }
@@ -46,5 +46,23 @@ public sealed interface Token {
         ;
         final char ch;
         SymbolKind(char ch) { this.ch = ch; }
+    }
+    
+    sealed interface KeywordKind permits DataTypeKind, FlowTypeKind, ModifierTypeKind, TypeTypeKind {
+    }
+    
+    enum DataTypeKind implements KeywordKind {
+    }
+    
+    enum FlowTypeKind implements KeywordKind {
+    
+    }
+    
+    enum ModifierTypeKind implements KeywordKind {
+    
+    }
+    
+    enum TypeTypeKind implements KeywordKind {
+    
     }
 }
