@@ -1,5 +1,8 @@
 package parser;
 
+import java.util.List;
+import java.util.Optional;
+
 public sealed interface Token {
     /**
      * Determines where the token starts
@@ -13,8 +16,8 @@ public sealed interface Token {
     record Whitespace(int start, String str) implements Token {}
     record StringLiteral(int start, String str) implements Token {}
     record Comment(int start, String str) implements Token {}
-    record Keyword(int start, String str) implements Token {}
-    record Symbol(SymbolKind kind, int start) implements Token {
+    record Keyword(int start, KeywordKind str) implements Token {}
+    record Symbol(int start, SymbolKind kind) implements Token {
         char symbol() { return kind.ch; }
     }
     enum SymbolKind {
@@ -46,5 +49,44 @@ public sealed interface Token {
         ;
         final char ch;
         SymbolKind(char ch) { this.ch = ch; }
+    }
+    
+    sealed interface KeywordKind permits DataTypeKind, FlowTypeKind, ModifierTypeKind, TypeTypeKind {
+    }
+    
+    enum DataTypeKind implements KeywordKind {
+    }
+    
+    enum FlowTypeKind implements KeywordKind {
+    
+    }
+    
+    enum ModifierTypeKind implements KeywordKind {
+    
+    }
+    
+    enum TypeTypeKind implements KeywordKind {
+    
+    }
+    
+    class Mapper {
+        private static final List<KeywordKind> KEYWORD_KIND_LIST;
+        private static final java.util.Map<Character, SymbolKind> BY_CHAR;
+        
+        static {
+            KEYWORD_KIND_LIST = new java.util.ArrayList<>();
+            KEYWORD_KIND_LIST.addAll(List.of(DataTypeKind.values()));
+            KEYWORD_KIND_LIST.addAll(List.of(FlowTypeKind.values()));
+            KEYWORD_KIND_LIST.addAll(List.of(ModifierTypeKind.values()));
+            KEYWORD_KIND_LIST.addAll(List.of(TypeTypeKind.values()));
+            
+            BY_CHAR = java.util.Arrays.stream(SymbolKind.values())
+                                      .collect(java.util.stream.Collectors.toMap(k -> k.ch, k -> k));
+        }
+        
+        public static Optional<Token> getToken(char chr, int start) {
+            return java.util.Optional.ofNullable(BY_CHAR.get(chr))
+                                     .map(kind -> new Symbol(start, kind));
+        }
     }
 }
