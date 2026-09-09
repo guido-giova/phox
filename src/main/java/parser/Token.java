@@ -52,6 +52,7 @@ public sealed interface Token {
     }
     
     sealed interface KeywordKind permits DataTypeKind, FlowTypeKind, ModifierTypeKind, TypeTypeKind {
+        default String text() {return "";}
     }
     
     enum DataTypeKind implements KeywordKind {
@@ -87,6 +88,15 @@ public sealed interface Token {
         public static Optional<Token> getToken(char chr, int start) {
             return java.util.Optional.ofNullable(BY_CHAR.get(chr))
                                      .map(kind -> new Symbol(start, kind));
+        }
+        
+        public static Token classifyWord(Word word) {
+            for (KeywordKind kk : KEYWORD_KIND_LIST) {
+                if (kk.text().equals(word.str)) {
+                    return new Token.Keyword(word.start, kk);
+                }
+            }
+            return word;
         }
     }
 }
