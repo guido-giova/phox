@@ -1,6 +1,11 @@
 package parser;
 
 public sealed interface Token {
+    /**
+     * Determines where the token starts
+     *
+     * @return index where the token begins
+     */
     int start();
     
     record Word(int start, String str) implements Token {}
