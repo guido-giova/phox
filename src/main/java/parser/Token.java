@@ -1,5 +1,8 @@
 package parser;
 
+import java.util.List;
+import java.util.Optional;
+
 public sealed interface Token {
     /**
      * Determines where the token starts
@@ -64,5 +67,26 @@ public sealed interface Token {
     
     enum TypeTypeKind implements KeywordKind {
     
+    }
+    
+    class Mapper {
+        private static final List<KeywordKind> KEYWORD_KIND_LIST;
+        private static final java.util.Map<Character, SymbolKind> BY_CHAR;
+        
+        static {
+            KEYWORD_KIND_LIST = new java.util.ArrayList<>();
+            KEYWORD_KIND_LIST.addAll(List.of(DataTypeKind.values()));
+            KEYWORD_KIND_LIST.addAll(List.of(FlowTypeKind.values()));
+            KEYWORD_KIND_LIST.addAll(List.of(ModifierTypeKind.values()));
+            KEYWORD_KIND_LIST.addAll(List.of(TypeTypeKind.values()));
+            
+            BY_CHAR = java.util.Arrays.stream(SymbolKind.values())
+                                      .collect(java.util.stream.Collectors.toMap(k -> k.ch, k -> k));
+        }
+        
+        public static Optional<Token> getToken(char chr, int start) {
+            return java.util.Optional.ofNullable(BY_CHAR.get(chr))
+                                     .map(kind -> new Symbol(start, kind));
+        }
     }
 }
