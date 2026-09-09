@@ -11,12 +11,63 @@ public sealed interface Token {
      */
     int start();
     
+    /**
+     * Represents any group of alphanumeric symbols that isn't a keyword. This represents class names, variable names,
+     * method names, etc.
+     *
+     * @param start Beginning index in the class definition
+     * @param str   Value itself
+     */
     record Word(int start, String str) implements Token {}
+    
+    /**
+     * Represents a literal number written. For example {@code 2} or {@code 1.5e10i32}.
+     *
+     * @param start Beginning index in the class definition
+     * @param str   Number itself
+     */
     record NumberLiteral(int start, String str) implements Token {}
-    record Whitespace(int start, String str) implements Token {}
+    
+    /**
+     * Represents a literal string. For example {@code "abc"}.
+     *
+     * @param start Beginning index in the class definition
+     * @param str   String itself
+     */
     record StringLiteral(int start, String str) implements Token {}
+    
+    /**
+     * Represents a whitespace.
+     *
+     * @param start Beginning index in the class definition
+     * @param str   Whitespace itself
+     */
+    record Whitespace(int start, String str) implements Token {}
+    
+    /**
+     * Represents the comment itself.
+     *
+     * @param start Beginning index in the class definition
+     * @param str   Comment itself
+     */
     record Comment(int start, String str) implements Token {}
+    
+    /**
+     * Represents a reserved keyword.
+     *
+     * @param start Beginning index in the class definition
+     * @param str   Keyword itself
+     * @see KeywordKind
+     */
     record Keyword(int start, KeywordKind str) implements Token {}
+    
+    /**
+     * Represents a special character.
+     *
+     * @param start Beginning index in the class definition
+     * @param kind  Symbol itself
+     * @see SymbolKind
+     */
     record Symbol(int start, SymbolKind kind) implements Token {
         char symbol() { return kind.ch; }
     }
