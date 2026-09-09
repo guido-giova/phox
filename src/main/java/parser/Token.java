@@ -14,7 +14,7 @@ public sealed interface Token {
     record StringLiteral(int start, String str) implements Token {}
     record Comment(int start, String str) implements Token {}
     record Keyword(int start, KeywordKind str) implements Token {}
-    record Symbol(SymbolKind kind, int start) implements Token {
+    record Symbol(int start, SymbolKind kind) implements Token {
         char symbol() { return kind.ch; }
     }
     enum SymbolKind {
