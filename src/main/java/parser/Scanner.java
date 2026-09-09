@@ -113,6 +113,7 @@ public class Scanner {
         throw new IllegalArgumentException("Unterminated comment starting at " + start);
     }
     
+    private static boolean isIdentifierChar(char c) {return Character.isLetterOrDigit(c) || c == '_';}
     private static boolean isDecDigit(char c) {return c >= '0' && c <= '9' || c == '_';}
     private static boolean isExponentSymbol(char c) {return c == 'e' || c == 'E';}
     private static boolean isSignSymbol(char c) {return c == '+' || c == '-';}
@@ -131,9 +132,8 @@ public class Scanner {
             String suf = entry.getKey();
             if (text.regionMatches(ii.get(), suf, 0, suf.length())) {
                 int after = ii.get() + suf.length();
-                boolean followedByIdentifierChar = after < ll
-                                                         && (Character.isLetterOrDigit(text.charAt(after)) || text.charAt(after) == '_');
-                if (!followedByIdentifierChar) {
+                boolean followedByIdentifierChar = after < ll && Scanner.isIdentifierChar(text.charAt(after));
+                if (! followedByIdentifierChar) {
                     explicitType = entry.getValue();
                     ii.set(after);
                     break;
