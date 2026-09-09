@@ -55,6 +55,10 @@ public sealed interface Token {
     }
     
     enum DataTypeKind implements KeywordKind {
+        INT64,
+        FLOAT32,
+        FLOAT64,
+        INT32
     }
     
     enum FlowTypeKind implements KeywordKind {

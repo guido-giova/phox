@@ -1,8 +1,20 @@
 package parser;
 
+import utils.CharPredicate;
+
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Scanner {
+    private static final Map<String, Token.DataTypeKind> SUFFIXES = Map.of(
+            "i32", Token.DataTypeKind.INT32,
+            "i64", Token.DataTypeKind.INT64,
+            "f32", Token.DataTypeKind.FLOAT32,
+            "f64", Token.DataTypeKind.FLOAT64
+    );
+    
     public static List<Token> scan(String text) {
         List<Token> tokens = new java.util.ArrayList<>();
         final int ll = text.length();
@@ -10,23 +22,28 @@ public class Scanner {
         int ps = 0;
         
         while (ii < ll) {
-            char c = text.charAt(ii);
+            char cc = text.charAt(ii);
             
-            if (c == '\"' || c == '\'') {
+            if (cc == '\"' || cc == '\'') {
                 tokens.addAll(Lexer.tokenize(text.substring(ps, ii), ps));
-                ii = scanString(text, ii, c, tokens);
+                ii = scanString(text, ii, cc, tokens);
                 ps = ii;
                 continue;
             }
             
-            if (c == '/' && ii + 1 < ll && text.charAt(ii + 1) == '*') {
+            if (cc == '/' && ii + 1 < ll && text.charAt(ii + 1) == '*') {
                 tokens.addAll(Lexer.tokenize(text.substring(ps, ii), ps));
                 ii = scanComment(text, ii, tokens);
                 ps = ii;
                 continue;
             }
             
-            
+            boolean atIdentifierBoundary = (ii == 0) || !isDecDigit(text.charAt(ii - 1));
+            if (isDecDigit(cc) && atIdentifierBoundary) {
+                tokens.addAll(Lexer.tokenize(text.substring(ps, ii), ps));
+                ii = Scanner.scanNumber(text, ii, tokens);
+                ps = ii;
+            }
             ii++;
         }
         
@@ -94,5 +111,85 @@ public class Scanner {
         }
         
         throw new IllegalArgumentException("Unterminated comment starting at " + start);
+    }
+    
+    private static boolean isDecDigit(char c) {return c >= '0' && c <= '9' || c == '_';}
+    private static boolean isExponentSymbol(char c) {return c == 'e' || c == 'E';}
+    private static boolean isSignSymbol(char c) {return c == '+' || c == '-';}
+    private static char charAt(String text, AtomicInteger ii) {return text.charAt(ii.get());}
+    
+    private static int scanNumber(String text, int start, List<Token> tokens) {
+        final int ll = text.length();
+        AtomicInteger ii = new AtomicInteger(start);
+        AtomicBoolean hasDot = new AtomicBoolean(false);
+        AtomicBoolean hasExponent = new AtomicBoolean(false);
+        
+        Scanner.decimalInterpreter(text, ll, ii, hasDot, hasExponent);
+        
+        Token.DataTypeKind explicitType = null;
+        for (Map.Entry<String, Token.DataTypeKind> entry : SUFFIXES.entrySet()) {
+            String suf = entry.getKey();
+            if (text.regionMatches(ii.get(), suf, 0, suf.length())) {
+                int after = ii.get() + suf.length();
+                boolean followedByIdentifierChar = after < ll
+                                                         && (Character.isLetterOrDigit(text.charAt(after)) || text.charAt(after) == '_');
+                if (!followedByIdentifierChar) {
+                    explicitType = entry.getValue();
+                    ii.set(after);
+                    break;
+                }
+            }
+        }
+        
+        if (explicitType == Token.DataTypeKind.INT32 || explicitType == Token.DataTypeKind.INT64) {
+            if (hasDot.get()) {
+                throw new IllegalArgumentException("Integer suffix invalid on non-integer literal at " + start);
+            }
+        }
+        
+        Token.DataTypeKind type = explicitType != null
+                ? explicitType
+                : (hasDot.get() ? Token.DataTypeKind.FLOAT32 : Token.DataTypeKind.INT32);
+        
+        tokens.add(new Token.NumberLiteral(start, text.substring(start, ii.get())));
+        return ii.get();
+    }
+    
+    private static void consumeDigitRun(String text, AtomicInteger ii, CharPredicate isDigit) {
+        final int ll = text.length();
+        if (ii.get() >= ll || isDigit.negate().test(Scanner.charAt(text, ii))) {
+            throw new IllegalArgumentException("Expected digit at " + ii);
+        }
+        ii.incrementAndGet();
+        while (ii.get() < ll) {
+            char cc = Scanner.charAt(text, ii);
+            if (isDigit.test(cc)) {
+                ii.incrementAndGet();
+            } else if (cc == '_' && ii.get() + 1 < ll && isDigit.test(text.charAt(ii.get() + 1))) {
+                ii.incrementAndGet(); // skip separator; loop consumes the digit right after it
+            } else {
+                break;
+            }
+        }
+    }
+    
+    private static void decimalInterpreter(final String text, final int ll, final AtomicInteger ii, final AtomicBoolean hasDot, final AtomicBoolean hasExponent) {
+        Scanner.consumeDigitRun(text, ii, Scanner::isDecDigit);
+        if (ii.get() < ll && Scanner.charAt(text, ii) == '.') {
+            hasDot.set(true);
+            ii.incrementAndGet();
+            Scanner.consumeDigitRun(text, ii, Scanner::isDecDigit);
+        }
+        if (ii.get() < ll && Scanner.isExponentSymbol(Scanner.charAt(text, ii))) {
+            hasExponent.set(true);
+            AtomicInteger jj = new AtomicInteger(ii.get() + 1);
+            if (jj.get() < ll && Scanner.isSignSymbol(Scanner.charAt(text, jj))) {
+                jj.incrementAndGet();
+            }
+            if (jj.get() < ll && Scanner.isDecDigit(Scanner.charAt(text, jj))) {
+                Scanner.consumeDigitRun(text, jj, Scanner::isDecDigit);
+                ii.set(jj.get());
+            }
+        }
     }
 }
