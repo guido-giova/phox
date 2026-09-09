@@ -8,6 +8,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Scanner {
+    private static final String HEXADECIMAL_IDENTIFIER = "0x";
+    private static final String OCTAL_IDENTIFIER = "0o";
+    private static final String BINARY_IDENTIFIER = "0b";
+    
     private static final Map<String, Token.DataTypeKind> SUFFIXES = Map.of(
             "i32", Token.DataTypeKind.INT32,
             "i64", Token.DataTypeKind.INT64,
