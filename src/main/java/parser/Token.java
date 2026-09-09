@@ -88,5 +88,10 @@ public sealed interface Token {
             return java.util.Optional.ofNullable(BY_CHAR.get(chr))
                                      .map(kind -> new Symbol(start, kind));
         }
+        
+    }
+    
+    static boolean isWhitespace(Token token) {
+        return token instanceof Token.Whitespace;
     }
 }
