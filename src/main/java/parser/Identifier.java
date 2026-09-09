@@ -2,7 +2,11 @@ package parser;
 
 import java.util.List;
 
-public class Identifier {
+public final class Identifier {
+    private Identifier() {
+        throw new UnsupportedOperationException("Don't instantiate Identifier");
+    }
+    
     public static List<Token> identify(List<Token> tokens) {
         return tokens.stream()
                      .map(Identifier::findKeyword)
