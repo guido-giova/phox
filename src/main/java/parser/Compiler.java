@@ -2,7 +2,11 @@ package parser;
 
 import java.util.List;
 
-public class Compiler {
+public final class Compiler {
+    private Compiler() {
+        throw new UnsupportedOperationException("Don't instantiate Compiler");
+    }
+    
     public static CompilerResponse validate(String text) {
         try {
             List<Token> tokens;
