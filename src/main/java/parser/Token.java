@@ -136,6 +136,16 @@ public sealed interface Token {
     }
     
     enum DataTypeKind implements KeywordKind {
+        VOID("void"),
+        NULL("null"),
+        INT32("int32"),
+        INT64("int64"),
+        FLOAT32("float32"),
+        FLOAT64("float64")
+        ;
+        final String text;
+        DataTypeKind(String text) {this.text = text;}
+        @Override public String text() {return this.text;}
     }
     
     enum FlowTypeKind implements KeywordKind {
