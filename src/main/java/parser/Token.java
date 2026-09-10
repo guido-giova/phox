@@ -69,33 +69,62 @@ public sealed interface Token {
      * @see SymbolKind
      */
     record Symbol(int start, SymbolKind kind) implements Token {
-        char symbol() { return kind.ch; }
+        char symbol() {return kind.ch;}
     }
+    
+    /**
+     * Contains all permitted symbols
+     */
     enum SymbolKind {
+        /** Ampersand symbol: {@code &} */
         AMPERSAND('&'),
+        /** Asterisk symbol: {@code *} */
         ASTERISK('*'),
+        /** At symbol: {@code @} */
         AT('@'),
+        /** Backslash symbol: {@code \} */
         BACK_SLASH('\\'),
+        /** Closing bracket symbol: {@code )} */
         BRACKET_CLOSE(')'),
+        /** Opening bracket symbol: {@code (} */
         BRACKET_OPEN('('),
+        /** Coma symbol: {@code ,} */
         COMA(','),
+        /** Colon symbol: {@code :} */
         COLON(':'),
+        /** Closing curly bracket symbol: <code>}</code> */
         CURLY_BRACKET_CLOSE('}'),
+        /** Opening curly bracket symbol: <code>{</code> */
         CURLY_BRACKET_OPEN('{'),
+        /** Double quotation marks symbol: {@code "} */
         DOUBLE_QUOTATION_MARK('"'),
+        /** Equals symbol: {@code =} */
         EQUALS('='),
+        /** Exclamation mark symbol: {@code !} */
         EXCLAMATION_MARK('!'),
+        /** Forward slash symbol: {@code /} */
         FORWARD_SLASH('/'),
+        /** Less than symbol: {@code <} */
         LESS_THAN('<'),
+        /** Minus symbol: {@code -} */
         MINUS('-'),
+        /** More than symbol: {@code >} */
         MORE_THAN('>'),
+        /** Period symbol: {@code .} */
         PERIOD('.'),
+        /** Pipe symbol: {@code |} */
         PIPE('|'),
+        /** Plus symbol: {@code +} */
         PLUS('+'),
+        /** Question mark symbol: {@code ?} */
         QUESTION_MARK('?'),
+        /** Semicolon symbol: {@code ;} */
         SEMICOLON(';'),
+        /** Simple quotation mark symbol: {@code '} */
         SIMPLE_QUOTATION_MARK('\''),
+        /** Closing square bracket symbol: {@code ]} */
         SQUARE_BRACKET_CLOSE(']'),
+        /** Opening square bracket symbol: {@code [} */
         SQUARE_BRACKET_OPEN('[')
         ;
         final char ch;
