@@ -156,7 +156,7 @@ public sealed interface Token {
         INT32("int32"),
         /** int64 primitive */
         INT64("int64"),
-        /** flaot32 primitive */
+        /** float32 primitive */
         FLOAT32("float32"),
         /** float64 primitive */
         FLOAT64("float64")
@@ -226,8 +226,8 @@ public sealed interface Token {
          * @return A Symbol token that represents the given char
          */
         public static Optional<Token> getToken(char chr, int start) {
-            return java.util.Optional.ofNullable(BY_CHAR.get(chr))
-                                     .map(kind -> new Symbol(start, kind));
+            return Optional.ofNullable(BY_CHAR.get(chr))
+                           .map(kind -> new Symbol(start, kind));
         }
         
         /**
