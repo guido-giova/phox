@@ -1,9 +1,14 @@
 package parser;
 
+import java.io.Serial;
+
 /**
  * Exception to indicate an error in validation of a Phox class
  */
 public class ValidationException extends RuntimeException {
+    @Serial
+    private static final long serialVersionUID = 3532412369150737442L;
+    
     /**
      * Constructs a new validation exception with the given message.
      *
