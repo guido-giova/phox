@@ -1,6 +1,10 @@
 package parser;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.List;
 
 public final class Classifier {
     private Classifier() {
@@ -41,6 +45,26 @@ public final class Classifier {
     }
     
     private static void handleFile(File file, String packageName) {
-        System.out.println(packageName + "." + file.getName());
+        final String fileName = file.getName();
+        final String completeClassName = packageName + "." + fileName.substring(0, fileName.length() - ".phox".length());
+        
+        String fileText = Classifier.readFile(file);
+        
+        CompilerResponse response = Compiler.validate(fileText);
+        switch (response) {
+            case CompilerResponse.Failed(String reason) ->
+                    throw new IllegalArgumentException("Couldn't compile class. Reason: " + reason);
+            case CompilerResponse.Success(List<Token> tokens) ->
+                    System.out.println(tokens);
+        }
+    }
+    
+    private static String readFile(File file) {
+        try {
+            byte[] bytes = Files.readAllBytes(file.toPath());
+            return new String(bytes, StandardCharsets.ISO_8859_1);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
