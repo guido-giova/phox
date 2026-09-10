@@ -22,6 +22,8 @@ public final class Compiler {
             List<Token> tokens;
             
             tokens = Scanner.scan(text);
+            tokens = Identifier.identify(tokens);
+            tokens = Cleaner.clean(tokens);
             return new CompilerResponse.Success(tokens);
         } catch (ValidationException iae) {
             return new CompilerResponse.Failed(iae.getLocalizedMessage());
