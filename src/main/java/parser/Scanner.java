@@ -9,9 +9,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Scanner {
-    private static final String HEXADECIMAL_IDENTIFIER = "0x";
-    private static final String OCTAL_IDENTIFIER = "0o";
-    private static final String BINARY_IDENTIFIER = "0b";
+    private static final String HEXADECIMAL_PREFIX = "0x";
+    private static final String OCTAL_PREFIX = "0o";
+    private static final String BINARY_PREFIX = "0b";
     
     private static final Map<String, Token.DataTypeKind> SUFFIXES = Map.of(
             "i32", Token.DataTypeKind.INT32,
@@ -124,7 +124,15 @@ public class Scanner {
         AtomicBoolean hasDot = new AtomicBoolean(false);
         AtomicBoolean hasExponent = new AtomicBoolean(false);
         
-        Scanner.decimalInterpreter(text, ll, ii, hasDot, hasExponent);
+        if (Chars.matchesIgnoreCase(text, ii, BINARY_PREFIX)) {
+            Scanner.binaryInterpreter(text, ll, ii, hasDot, hasExponent);
+        } else if (Chars.matchesIgnoreCase(text, ii, OCTAL_PREFIX)) {
+            Scanner.octalInterpreter(text, ll, ii, hasDot, hasExponent);
+        } else if (Chars.matchesIgnoreCase(text, ii, HEXADECIMAL_PREFIX)) {
+            Scanner.hexadecimalInterpreter(text, ll, ii, hasDot, hasExponent);
+        } else {
+            Scanner.decimalInterpreter(text, ll, ii, hasDot, hasExponent);
+        }
         
         Token.DataTypeKind explicitType = null;
         for (Map.Entry<String, Token.DataTypeKind> entry : SUFFIXES.entrySet()) {
@@ -190,5 +198,17 @@ public class Scanner {
                 ii.set(jj.get());
             }
         }
+    }
+    
+    private static void binaryInterpreter(final String text, final int ll, final AtomicInteger ii, final AtomicBoolean hasDot, final AtomicBoolean hasExponent) {
+    
+    }
+    
+    private static void octalInterpreter(final String text, final int ll, final AtomicInteger ii, final AtomicBoolean hasDot, final AtomicBoolean hasExponent) {
+    
+    }
+    
+    private static void hexadecimalInterpreter(final String text, final int ll, final AtomicInteger ii, final AtomicBoolean hasDot, final AtomicBoolean hasExponent) {
+    
     }
 }

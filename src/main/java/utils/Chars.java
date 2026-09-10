@@ -22,4 +22,9 @@ public class Chars {
     public static char charAt(String text, AtomicInteger ii) {
         return text.charAt(ii.get());
     }
+    
+    public static boolean matchesIgnoreCase(String text, AtomicInteger ii, String prefix) {
+        return text.regionMatches(ii.get(), prefix,               0, prefix.length())
+            || text.regionMatches(ii.get(), prefix.toUpperCase(), 0, prefix.length());
+    }
 }
