@@ -44,7 +44,7 @@ public class Scanner {
             
             if (cur == '\\') {
                 if (ii + 1 >= ll) {
-                    throw new IllegalArgumentException("Trailing escape character at " + ii);
+                    throw new ValidationException("Trailing escape character", ii);
                 }
                 char next = text.charAt(ii + 1);
                 switch (next) {
@@ -56,13 +56,13 @@ public class Scanner {
                     case '\'' -> { sb.append('\''); ii += 2; }
                     case 'u'  -> {
                         if (ii + 6 > ll) {
-                            throw new IllegalArgumentException("Invalid Unicode escape at " + ii);
+                            throw new ValidationException("Invalid Unicode escape", ii);
                         }
                         String hex = text.substring(ii + 2, ii + 6);
                         sb.append((char) Integer.parseInt(hex, 16));
                         ii += 6;
                     }
-                    default -> throw new IllegalArgumentException("Unknown escape '\\" + next + "' at " + ii);
+                    default -> throw new ValidationException("Unknown escape '\\" + next + "'", ii);
                 }
                 continue;
             }
@@ -76,7 +76,7 @@ public class Scanner {
             ii++;
         }
         
-        throw new IllegalArgumentException("Unterminated string starting at " + start);
+        throw new ValidationException("Unterminated string starting", start);
     }
     
     private static int scanComment(String text, int start, List<Token> tokens) {
@@ -93,6 +93,6 @@ public class Scanner {
             ii++;
         }
         
-        throw new IllegalArgumentException("Unterminated comment starting at " + start);
+        throw new ValidationException("Unterminated comment starting", start);
     }
 }
