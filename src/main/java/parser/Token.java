@@ -132,7 +132,7 @@ public sealed interface Token {
     }
     
     sealed interface KeywordKind permits DataTypeKind, FlowTypeKind, ModifierTypeKind, TypeTypeKind {
-        default String text() {return "";}
+        String text();
     }
     
     enum DataTypeKind implements KeywordKind {
@@ -149,15 +149,24 @@ public sealed interface Token {
     }
     
     enum FlowTypeKind implements KeywordKind {
-    
+        ;
+        final String text;
+        FlowTypeKind(String text) {this.text = text;}
+        @Override public String text() {return this.text;}
     }
     
     enum ModifierTypeKind implements KeywordKind {
-    
+        ;
+        final String text;
+        ModifierTypeKind(String text) {this.text = text;}
+        @Override public String text() {return this.text;}
     }
     
     enum TypeTypeKind implements KeywordKind {
-    
+        ;
+        final String text;
+        TypeTypeKind(String text) {this.text = text;}
+        @Override public String text() {return this.text;}
     }
     
     final class Mapper {
