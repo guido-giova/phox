@@ -90,10 +90,6 @@ public sealed interface Token {
                                      .map(kind -> new Symbol(start, kind));
         }
         
-        static boolean isWhitespace(Token token) {
-            return token instanceof Token.Whitespace;
-        }
-        
         /**
          * Returns a keyword token if the given word is a reserved keyword.
          *
@@ -110,6 +106,9 @@ public sealed interface Token {
             }
             return word;
         }
+    }
     
+    static boolean isWhitespace(Token token) {
+        return token instanceof Token.Whitespace;
     }
 }
