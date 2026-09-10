@@ -1,6 +1,7 @@
 package parser;
 
 import utils.CharPredicate;
+import utils.Chars;
 
 import java.util.List;
 import java.util.Map;
@@ -42,8 +43,8 @@ public class Scanner {
                 continue;
             }
             
-            boolean atIdentifierBoundary = (ii == 0) || !isDecDigit(text.charAt(ii - 1));
-            if (isDecDigit(cc) && atIdentifierBoundary) {
+            boolean atIdentifierBoundary = (ii == 0) || !Chars.isIdentifierChar(text.charAt(ii - 1));
+            if (Chars.isDecDigit(cc) && atIdentifierBoundary) {
                 tokens.addAll(Lexer.tokenize(text.substring(ps, ii), ps));
                 ii = Scanner.scanNumber(text, ii, tokens);
                 ps = ii;
@@ -117,12 +118,6 @@ public class Scanner {
         throw new IllegalArgumentException("Unterminated comment starting at " + start);
     }
     
-    private static boolean isIdentifierChar(char c) {return Character.isLetterOrDigit(c) || c == '_';}
-    private static boolean isDecDigit(char c) {return c >= '0' && c <= '9' || c == '_';}
-    private static boolean isExponentSymbol(char c) {return c == 'e' || c == 'E';}
-    private static boolean isSignSymbol(char c) {return c == '+' || c == '-';}
-    private static char charAt(String text, AtomicInteger ii) {return text.charAt(ii.get());}
-    
     private static int scanNumber(String text, int start, List<Token> tokens) {
         final int ll = text.length();
         AtomicInteger ii = new AtomicInteger(start);
@@ -136,7 +131,7 @@ public class Scanner {
             String suf = entry.getKey();
             if (text.regionMatches(ii.get(), suf, 0, suf.length())) {
                 int after = ii.get() + suf.length();
-                boolean followedByIdentifierChar = after < ll && Scanner.isIdentifierChar(text.charAt(after));
+                boolean followedByIdentifierChar = after < ll && Chars.isIdentifierChar(text.charAt(after));
                 if (! followedByIdentifierChar) {
                     explicitType = entry.getValue();
                     ii.set(after);
@@ -161,12 +156,12 @@ public class Scanner {
     
     private static void consumeDigitRun(String text, AtomicInteger ii, CharPredicate isDigit) {
         final int ll = text.length();
-        if (ii.get() >= ll || isDigit.negate().test(Scanner.charAt(text, ii))) {
+        if (ii.get() >= ll || isDigit.negate().test(Chars.charAt(text, ii))) {
             throw new IllegalArgumentException("Expected digit at " + ii);
         }
         ii.incrementAndGet();
         while (ii.get() < ll) {
-            char cc = Scanner.charAt(text, ii);
+            char cc = Chars.charAt(text, ii);
             if (isDigit.test(cc)) {
                 ii.incrementAndGet();
             } else if (cc == '_' && ii.get() + 1 < ll && isDigit.test(text.charAt(ii.get() + 1))) {
@@ -178,20 +173,20 @@ public class Scanner {
     }
     
     private static void decimalInterpreter(final String text, final int ll, final AtomicInteger ii, final AtomicBoolean hasDot, final AtomicBoolean hasExponent) {
-        Scanner.consumeDigitRun(text, ii, Scanner::isDecDigit);
-        if (ii.get() < ll && Scanner.charAt(text, ii) == '.') {
+        Scanner.consumeDigitRun(text, ii, Chars::isDecDigit);
+        if (ii.get() < ll && Chars.charAt(text, ii) == '.') {
             hasDot.set(true);
             ii.incrementAndGet();
-            Scanner.consumeDigitRun(text, ii, Scanner::isDecDigit);
+            Scanner.consumeDigitRun(text, ii, Chars::isDecDigit);
         }
-        if (ii.get() < ll && Scanner.isExponentSymbol(Scanner.charAt(text, ii))) {
+        if (ii.get() < ll && Chars.isExponentSymbol(Chars.charAt(text, ii))) {
             hasExponent.set(true);
             AtomicInteger jj = new AtomicInteger(ii.get() + 1);
-            if (jj.get() < ll && Scanner.isSignSymbol(Scanner.charAt(text, jj))) {
+            if (jj.get() < ll && Chars.isSignSymbol(Chars.charAt(text, jj))) {
                 jj.incrementAndGet();
             }
-            if (jj.get() < ll && Scanner.isDecDigit(Scanner.charAt(text, jj))) {
-                Scanner.consumeDigitRun(text, jj, Scanner::isDecDigit);
+            if (jj.get() < ll && Chars.isDecDigit(Chars.charAt(text, jj))) {
+                Scanner.consumeDigitRun(text, jj, Chars::isDecDigit);
                 ii.set(jj.get());
             }
         }
