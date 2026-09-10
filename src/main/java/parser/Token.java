@@ -3,6 +3,9 @@ package parser;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Represents each element of a class: comments, words, string literals, number literals, symbols, etc.
+ */
 public sealed interface Token {
     /**
      * Determines where the token starts
@@ -145,11 +148,17 @@ public sealed interface Token {
      * Represents the primitives and other data types.
      */
     enum DataTypeKind implements KeywordKind {
+        /** void primitive */
         VOID("void"),
+        /** null primitive */
         NULL("null"),
+        /** int32 primitive */
         INT32("int32"),
+        /** int64 primitive */
         INT64("int64"),
+        /** flaot32 primitive */
         FLOAT32("float32"),
+        /** float64 primitive */
         FLOAT64("float64")
         ;
         final String text;
@@ -187,6 +196,9 @@ public sealed interface Token {
         @Override public String text() {return this.text;}
     }
     
+    /**
+     * Utility class for token transformations
+     */
     final class Mapper {
         private Mapper() {
             throw new UnsupportedOperationException("Don't instantiate Mapper");
@@ -206,6 +218,13 @@ public sealed interface Token {
                                       .collect(java.util.stream.Collectors.toMap(k -> k.ch, k -> k));
         }
         
+        /**
+         * Get the symbol token of the given char.
+         *
+         * @param chr   of the symbol
+         * @param start of the symbol
+         * @return A Symbol token that represents the given char
+         */
         public static Optional<Token> getToken(char chr, int start) {
             return java.util.Optional.ofNullable(BY_CHAR.get(chr))
                                      .map(kind -> new Symbol(start, kind));
@@ -229,6 +248,12 @@ public sealed interface Token {
         }
     }
     
+    /**
+     * Determines if a token is a Whitespace token
+     *
+     * @param token that will be checked
+     * @return {@code true} if it's a whitespace token, {@code false} otherwise
+     */
     static boolean isWhitespace(Token token) {
         return token instanceof Token.Whitespace;
     }
