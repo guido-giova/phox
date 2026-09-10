@@ -131,10 +131,19 @@ public sealed interface Token {
         SymbolKind(char ch) { this.ch = ch; }
     }
     
+    /**
+     * Represents the different types of keywords that exist.
+     */
     sealed interface KeywordKind permits DataTypeKind, FlowTypeKind, ModifierTypeKind, TypeTypeKind {
+        /**
+         * @return the string it reserves
+         */
         String text();
     }
     
+    /**
+     * Represents the primitives and other data types.
+     */
     enum DataTypeKind implements KeywordKind {
         VOID("void"),
         NULL("null"),
@@ -148,6 +157,9 @@ public sealed interface Token {
         @Override public String text() {return this.text;}
     }
     
+    /**
+     * Represents the keywords that define code flow
+     */
     enum FlowTypeKind implements KeywordKind {
         ;
         final String text;
@@ -155,6 +167,9 @@ public sealed interface Token {
         @Override public String text() {return this.text;}
     }
     
+    /**
+     * Represents the keywords that define the modifiers of methods, classes, structures, variables, etc.
+     */
     enum ModifierTypeKind implements KeywordKind {
         ;
         final String text;
@@ -162,6 +177,9 @@ public sealed interface Token {
         @Override public String text() {return this.text;}
     }
     
+    /**
+     * Represents the keywords for class and structure definition
+     */
     enum TypeTypeKind implements KeywordKind {
         ;
         final String text;
