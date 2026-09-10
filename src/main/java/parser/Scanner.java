@@ -201,14 +201,20 @@ public class Scanner {
     }
     
     private static void binaryInterpreter(final String text, final int ll, final AtomicInteger ii, final AtomicBoolean hasDot, final AtomicBoolean hasExponent) {
-    
+        ii.addAndGet(2); // skip 0b
+        Scanner.consumeDigitRun(text, ii, Chars::isBinDigit);
+        
     }
     
     private static void octalInterpreter(final String text, final int ll, final AtomicInteger ii, final AtomicBoolean hasDot, final AtomicBoolean hasExponent) {
-    
+        ii.addAndGet(2); // skip 0o
+        Scanner.consumeDigitRun(text, ii, Chars::isOctDigit);
+        
     }
     
     private static void hexadecimalInterpreter(final String text, final int ll, final AtomicInteger ii, final AtomicBoolean hasDot, final AtomicBoolean hasExponent) {
-    
+        ii.addAndGet(2); // skip 0x
+        Scanner.consumeDigitRun(text, ii, Chars::isHexDigit);
+        
     }
 }
