@@ -23,7 +23,7 @@ public final class Compiler {
             
             tokens = Scanner.scan(text);
             return new CompilerResponse.Success(tokens);
-        } catch (IllegalArgumentException iae) {
+        } catch (ValidationException iae) {
             return new CompilerResponse.Failed(iae.getLocalizedMessage());
         }
     }
