@@ -132,6 +132,7 @@ public sealed interface Token {
     }
     
     sealed interface KeywordKind permits DataTypeKind, FlowTypeKind, ModifierTypeKind, TypeTypeKind {
+        default String text() {return "";}
     }
     
     enum DataTypeKind implements KeywordKind {
@@ -172,5 +173,26 @@ public sealed interface Token {
             return java.util.Optional.ofNullable(BY_CHAR.get(chr))
                                      .map(kind -> new Symbol(start, kind));
         }
+        
+        /**
+         * Returns a keyword token if the given word is a reserved keyword.
+         *
+         * @param word to be checked
+         * @return a keyword token or the word given.
+         * @see Token.Word
+         * @see Token.KeywordKind
+         */
+        public static Token classifyWord(Word word) {
+            for (KeywordKind kk : KEYWORD_KIND_LIST) {
+                if (kk.text().equals(word.str)) {
+                    return new Token.Keyword(word.start, kk);
+                }
+            }
+            return word;
+        }
+    }
+    
+    static boolean isWhitespace(Token token) {
+        return token instanceof Token.Whitespace;
     }
 }
