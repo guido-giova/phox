@@ -2,7 +2,11 @@ package parser;
 
 import java.util.List;
 
-public class Lexer {
+public final class Lexer {
+    private Lexer() {
+        throw new UnsupportedOperationException("Don't instantiate Lexer");
+    }
+    
     public static List<Token> tokenize(String text) {
         return Lexer.tokenize(text, 0);
     }
