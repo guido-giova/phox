@@ -172,6 +172,16 @@ public sealed interface Token {
      * Represents the keywords that define code flow
      */
     enum FlowTypeKind implements KeywordKind {
+        /** Indicates the {@code return} keyword*/
+        RETURN("return"),
+        /** Indicates the {@code if} keyword*/
+        IF("if"),
+        /** Indicates the {@code else} keyword*/
+        ELSE("else"),
+        /** Indicates the {@code for} keyword*/
+        FOR("for"),
+        /** Indicates the {@code while} keyword*/
+        WHILE("while")
         ;
         final String text;
         FlowTypeKind(String text) {this.text = text;}
