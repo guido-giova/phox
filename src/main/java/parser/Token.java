@@ -202,6 +202,18 @@ public sealed interface Token {
      * Represents the keywords for class and structure definition
      */
     enum TypeTypeKind implements KeywordKind {
+        /** Indicates the {@code class} keyword*/
+        CLASS("class"),
+        /** Indicates the {@code structure} keyword*/
+        STRUCTURE("structure"),
+        /** Indicates the {@code extends} keyword*/
+        EXTENDS("extends"),
+        /** Indicates the {@code syntax} keyword*/
+        SYNTAX("syntax"),
+        /** Indicates the {@code this} keyword*/
+        THIS("this"),
+        /** Indicates the {@code child} keyword*/
+        CHILD("child")
         ;
         final String text;
         TypeTypeKind(String text) {this.text = text;}
