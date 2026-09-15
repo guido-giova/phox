@@ -158,8 +158,6 @@ public sealed interface Token {
     enum DataTypeKind implements KeywordKind {
         /** void primitive */
         VOID("void"),
-        /** null primitive */
-        NULL("null"),
         /** int32 primitive */
         INT32("int32"),
         /** int64 primitive */
