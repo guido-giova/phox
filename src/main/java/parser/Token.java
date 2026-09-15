@@ -139,7 +139,13 @@ public sealed interface Token {
     /**
      * Represents the different types of keywords that exist.
      */
-    sealed interface KeywordKind permits DataTypeKind, FlowTypeKind, ModifierTypeKind, TypeTypeKind {
+    sealed interface KeywordKind
+             permits /* enums */
+                     DataTypeKind,
+                     FlowTypeKind,
+                     TypeTypeKind,
+                     /* interfaces */
+                     ModifierTypeKind {
         /**
          * @return the string it reserves
          */
@@ -189,16 +195,6 @@ public sealed interface Token {
     }
     
     /**
-     * Represents the keywords that define the modifiers of methods, classes, structures, variables, etc.
-     */
-    enum ModifierTypeKind implements KeywordKind {
-        ;
-        final String text;
-        ModifierTypeKind(String text) {this.text = text;}
-        @Override public String text() {return this.text;}
-    }
-    
-    /**
      * Represents the keywords for class and structure definition
      */
     enum TypeTypeKind implements KeywordKind {
@@ -221,6 +217,114 @@ public sealed interface Token {
     }
     
     /**
+     * Represents the keywords that define the modifiers of methods, classes, structures, variables, etc.
+     */
+    sealed interface ModifierTypeKind
+            extends KeywordKind
+            permits VisibilityTypeKind,
+                    InheritanceTypeKind,
+                    DynamismTypeKind {
+    }
+    
+    /**
+     * Represents the keywords that define visibility
+     * <br>
+     * There are 4 types of visibility:
+     * <table>
+     *     <caption>
+     *         Types of visibility / access
+     *     </caption>
+     *     <tr>
+     *         <th>Keyword</th>
+     *         <th>Visibility rules</th>
+     *     </tr>
+     *     <tr>
+     *         <td>public</td>
+     *         <td>Anyone from anywhere can access</td>
+     *     </tr>
+     *     <tr>
+     *         <td>(package-protected)</td>
+     *         <td>Only classes inside the same package can access</td>
+     *     </tr>
+     *     <tr>
+     *         <td>protected</td>
+     *         <td>Only child classes can access</td>
+     *     </tr>
+     *     <tr>
+     *         <td>private</td>
+     *         <td>No class can access (except itself)</td>
+     *     </tr>
+     * </table>
+     */
+    enum VisibilityTypeKind implements ModifierTypeKind {
+        /** Indicates the {@code public} keyword*/
+        PUBLIC("public"),
+        /** Indicates the {@code protected} keyword*/
+        PROTECTED("protected"),
+        /** Indicates the {@code private} keyword*/
+        PRIVATE("private"),
+        ;
+        final String text;
+        VisibilityTypeKind(String text) {this.text = text;}
+        @Override public String text() {return this.text;}
+    }
+    
+    /**
+     * Represents the keywords that define inheritance.
+     * <br>
+     * There are 4 types of inheritance:
+     * <table>
+     *     <caption>
+     *         Types of inheritance
+     *     </caption>
+     *     <tr>
+     *         <th>Keyword</th>
+     *         <th>Inheritance rules</th>
+     *     </tr>
+     *     <tr>
+     *         <td>open</td>
+     *         <td>Anyone from anywhere can inherit</td>
+     *     </tr>
+     *     <tr>
+     *         <td>(internal)</td>
+     *         <td>Only classes inside the same package can inherit</td>
+     *     </tr>
+     *     <tr>
+     *         <td>sealed</td>
+     *         <td>Only the listed classes can inherit</td>
+     *     </tr>
+     *     <tr>
+     *         <td>closed</td>
+     *         <td>No class can inherit</td>
+     *     </tr>
+     * </table>
+     */
+    enum InheritanceTypeKind implements ModifierTypeKind {
+        /** Indicates the {@code open} keyword*/
+        OPEN("open"),
+        /** Indicates the {@code sealed} keyword*/
+        SEALED("sealed"),
+        /** Indicates the {@code closed} keyword*/
+        CLOSED("closed"),
+        ;
+        final String text;
+        InheritanceTypeKind(String text) {this.text = text;}
+        @Override public String text() {return this.text;}
+    }
+    
+    /**
+     * Represents the keywords that define dynamism
+     */
+    enum DynamismTypeKind implements ModifierTypeKind {
+        /** Indicates the {@code static} keyword*/
+        STATIC("static"),
+        ;
+        final String text;
+        DynamismTypeKind(String text) {this.text = text;}
+        @Override public String text() {return this.text;}
+    }
+    
+    /**
      * Utility class for token transformations
      */
     final class Mapper {
@@ -235,8 +339,11 @@ public sealed interface Token {
             KEYWORD_KIND_LIST = new java.util.ArrayList<>();
             KEYWORD_KIND_LIST.addAll(List.of(DataTypeKind.values()));
             KEYWORD_KIND_LIST.addAll(List.of(FlowTypeKind.values()));
-            KEYWORD_KIND_LIST.addAll(List.of(ModifierTypeKind.values()));
             KEYWORD_KIND_LIST.addAll(List.of(TypeTypeKind.values()));
+            
+            KEYWORD_KIND_LIST.addAll(List.of(VisibilityTypeKind.values()));
+            KEYWORD_KIND_LIST.addAll(List.of(InheritanceTypeKind.values()));
+            KEYWORD_KIND_LIST.addAll(List.of(DynamismTypeKind.values()));
             
             BY_CHAR = java.util.Arrays.stream(SymbolKind.values())
                                       .collect(java.util.stream.Collectors.toMap(k -> k.ch, k -> k));
