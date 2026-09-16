@@ -143,8 +143,8 @@ public sealed interface Token {
              permits /* enums */
                      DataTypeKind,
                      FlowTypeKind,
-                     TypeTypeKind,
                      /* interfaces */
+                     TypeTypeKind,
                      ModifierTypeKind {
         /**
          * @return the string it reserves
@@ -195,22 +195,67 @@ public sealed interface Token {
     /**
      * Represents the keywords for class and structure definition
      */
-    enum TypeTypeKind implements KeywordKind {
+    sealed interface TypeTypeKind
+             extends KeywordKind
+             permits TypeCreationKind,
+                     TypeListingKind,
+                     TypeSyntaxKind,
+                     TypeVariableKind {}
+    
+    /**
+     * Represents type creation keywords.
+     */
+    enum TypeCreationKind implements TypeTypeKind {
         /** Indicates the {@code class} keyword*/
         CLASS("class"),
         /** Indicates the {@code structure} keyword*/
         STRUCTURE("structure"),
+        /** Indicates the {@code enum} keyword*/
+        ENUM("enum");
+        final String text;
+        TypeCreationKind(String text) {this.text = text;}
+        @Override public String text() {return this.text;}
+    }
+    
+    /**
+     * Represents modifications of a type.
+     */
+    enum TypeListingKind implements TypeTypeKind {
         /** Indicates the {@code extends} keyword*/
         EXTENDS("extends"),
+        /** Indicates the {@code permits} keyword*/
+        PERMITS("permits"),
+        ;
+        final String text;
+        TypeListingKind(String text) {this.text = text;}
+        @Override public String text() {return this.text;}
+    }
+    
+    /**
+     * Represents the token syntax.
+     */
+    enum TypeSyntaxKind implements TypeTypeKind {
         /** Indicates the {@code syntax} keyword*/
-        SYNTAX("syntax"),
+        SYNTAX("syntax")
+        ;
+        final String text;
+        TypeSyntaxKind(String text) {this.text = text;}
+        @Override public String text() {return this.text;}
+    }
+    
+    /**
+     * Represents the token that refer to the types.
+     */
+    enum TypeVariableKind implements TypeTypeKind {
         /** Indicates the {@code this} keyword*/
         THIS("this"),
         /** Indicates the {@code child} keyword*/
-        CHILD("child")
+        CHILD("child"),
+        /** Indicates the {@code super} keyword*/
+        SUPER("super")
         ;
         final String text;
-        TypeTypeKind(String text) {this.text = text;}
+        TypeVariableKind(String text) {this.text = text;}
         @Override public String text() {return this.text;}
     }
     
@@ -337,8 +382,14 @@ public sealed interface Token {
             KEYWORD_KIND_LIST = new java.util.ArrayList<>();
             KEYWORD_KIND_LIST.addAll(List.of(DataTypeKind.values()));
             KEYWORD_KIND_LIST.addAll(List.of(FlowTypeKind.values()));
-            KEYWORD_KIND_LIST.addAll(List.of(TypeTypeKind.values()));
             
+            /* Type kinds */
+            KEYWORD_KIND_LIST.addAll(List.of(TypeCreationKind.values()));
+            KEYWORD_KIND_LIST.addAll(List.of(TypeListingKind.values()));
+            KEYWORD_KIND_LIST.addAll(List.of(TypeSyntaxKind.values()));
+            KEYWORD_KIND_LIST.addAll(List.of(TypeVariableKind.values()));
+            
+            /* Modifier kinds */
             KEYWORD_KIND_LIST.addAll(List.of(VisibilityTypeKind.values()));
             KEYWORD_KIND_LIST.addAll(List.of(InheritanceTypeKind.values()));
             KEYWORD_KIND_LIST.addAll(List.of(DynamismTypeKind.values()));
