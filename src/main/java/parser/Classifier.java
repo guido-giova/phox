@@ -2,6 +2,7 @@ package parser;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
@@ -11,31 +12,29 @@ public final class Classifier {
         throw new UnsupportedOperationException("Don't instantiate Classifier");
     }
     
-    public static void compilePath(String[] path) {
-        Classifier.compilePath(String.join(" ", path));
-    }
-    
-    private static void compilePath(String path) {
+    public static List<TypeDefinition> compilePath(String path) {
         File main = new File(path);
         if (! main.exists()) {
             System.err.println("File not exists");
             System.exit(1);
         }
-        Classifier.checkFileType(main, "");
+        return Classifier.checkFileType(main, "");
     }
     
-    private static void checkFileType(File file, String packageName) {
+    private static List<TypeDefinition> checkFileType(File file, String packageName) {
         if (file.isFile() && file.getName().endsWith(".phox")) {
-            Classifier.handleFile(file, packageName);
+            return List.of(Classifier.handleFile(file, packageName));
         }
-        if (file.isDirectory()) {
-            File[] children = file.listFiles();
-            if (children == null) { return; }
-            
-            for (File child : children) {
-                Classifier.checkFileType(child, Classifier.getPackageName(file, packageName));
-            }
+        if (! file.isDirectory()) {return List.of();}
+    
+        File[] children = file.listFiles();
+        if (children == null) {return List.of();}
+        
+        List<TypeDefinition> definitions = new java.util.ArrayList<>();
+        for (File child : children) {
+            definitions.addAll(Classifier.checkFileType(child, Classifier.getPackageName(file, packageName)));
         }
+        return definitions;
     }
     
     private static String getPackageName(File file, String packageName) {
@@ -44,19 +43,19 @@ public final class Classifier {
         return newPackageName + file.getName();
     }
     
-    private static void handleFile(File file, String packageName) {
+    private static TypeDefinition handleFile(File file, String packageName) {
         final String fileName = file.getName();
         final String completeClassName = packageName + "." + fileName.substring(0, fileName.length() - ".phox".length());
         
         String fileText = Classifier.readFile(file);
         
         CompilerResponse response = Compiler.validate(fileText);
-        switch (response) {
+        return switch (response) {
             case CompilerResponse.Failed(String reason) ->
                     throw new IllegalArgumentException("Couldn't compile class. Reason: " + reason);
             case CompilerResponse.Success(List<Token> tokens) ->
-                    System.out.println(tokens);
-        }
+                    new TypeDefinition(completeClassName, tokens);
+        };
     }
     
     private static String readFile(File file) {
