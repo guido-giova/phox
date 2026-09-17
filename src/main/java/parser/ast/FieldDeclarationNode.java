@@ -9,4 +9,8 @@ public record FieldDeclarationNode(
         Token.InheritanceTypeKind inheritance,
         Token.DynamismTypeKind dynamism,
         Token definition
-) implements ASTNode {}
+) implements ASTNode,
+             WithName,
+             WithVisibility,
+             WithDynamism,
+             WithInheritance {}

@@ -12,4 +12,8 @@ public record MethodDeclarationNode(
         String name,
         List<Parameter> params,
         MethodBody body
-) implements ASTNode {}
+) implements ASTNode,
+             WithName,
+             WithVisibility,
+             WithDynamism,
+             WithInheritance {}

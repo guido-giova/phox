@@ -13,4 +13,8 @@ record ClassDeclarationNode(
         List<FieldDeclarationNode> fields,
         List<MethodDeclarationNode> methods,
         List<TypeNode> childTypes
-) implements TypeNode {}
+) implements TypeNode,
+             WithName,
+             WithVisibility,
+             WithDynamism,
+             WithInheritance {}
