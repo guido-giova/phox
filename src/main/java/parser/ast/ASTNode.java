@@ -1,4 +1,6 @@
-package parser;
+package parser.ast;
+
+import parser.Token;
 
 public sealed interface ASTNode {
     record FieldDeclarationNode(
