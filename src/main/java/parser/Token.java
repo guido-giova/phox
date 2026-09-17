@@ -211,7 +211,9 @@ public sealed interface Token {
         /** Indicates the {@code structure} keyword*/
         STRUCTURE("structure"),
         /** Indicates the {@code enum} keyword*/
-        ENUM("enum");
+        ENUM("enum"),
+        /** Indicates the {@code data} keyword*/
+        DATA("data");
         final String text;
         TypeCreationKind(String text) {this.text = text;}
         @Override public String text() {return this.text;}
