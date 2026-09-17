@@ -1,12 +1,12 @@
 package parser;
 
-import java.util.List;
-
 public sealed interface ASTNode {
     record FieldDeclarationNode(
         String name,
         TypeReference type,
-        List<Token.ModifierTypeKind> modifiers,
+        Token.VisibilityTypeKind visibility,
+        Token.InheritanceTypeKind inheritance,
+        Token.DynamismTypeKind dynamism,
         Token definition
     ) implements ASTNode {}
 }
