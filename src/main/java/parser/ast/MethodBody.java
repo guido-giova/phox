@@ -6,5 +6,5 @@ import java.util.List;
 
 public sealed interface MethodBody {
     record Unparsed(List<Token> tokens) implements MethodBody {}
-    record Parsed(String block) implements MethodBody {} // todo: create statement block
+    record Parsed(Statement.Block block) implements MethodBody {}
 }
