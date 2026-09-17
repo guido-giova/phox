@@ -413,20 +413,23 @@ public sealed interface Token {
         }
         
         /**
-         * Returns a keyword token if the given word is a reserved keyword.
+         * Returns a keyword token if the given token is a reserved keyword.
          *
-         * @param word to be checked
-         * @return a keyword token or the word given.
+         * @param token to be checked
+         * @return a keyword token or the token given.
          * @see Token.Word
          * @see Token.KeywordKind
          */
-        public static Token classifyWord(Word word) {
+        public static Token classifyWord(Token token) {
+            if (! (token instanceof Word(int start, String str))) {
+                return token;
+            }
             for (KeywordKind kk : KEYWORD_KIND_LIST) {
-                if (kk.text().equals(word.str)) {
-                    return new Token.Keyword(word.start, kk);
+                if (kk.text().equals(str)) {
+                    return new Token.Keyword(start, kk);
                 }
             }
-            return word;
+            return token;
         }
     }
     

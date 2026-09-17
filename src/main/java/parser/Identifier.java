@@ -18,21 +18,7 @@ public final class Identifier {
      */
     public static List<Token> identify(List<Token> tokens) {
         return tokens.stream()
-                     .map(Identifier::findKeyword)
+                     .map(Token.Mapper::classifyWord)
                      .toList();
-    }
-    
-    /**
-     * Filters through tokens to find words. Words are then mapped by Token.Mapper
-     *
-     * @param token that will be mapped
-     * @return the transformed token if valid, the same if not
-     * @see Token.Mapper
-     */
-    private static Token findKeyword(Token token) {
-        if (token instanceof Token.Word w) {
-            return Token.Mapper.classifyWord(w);
-        }
-        return token;
     }
 }
