@@ -4,7 +4,6 @@ import parser.exception.PhoxFileNotFoundException;
 import parser.exception.PhoxIOException;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -53,6 +52,15 @@ public final class Phox {
         return newPackageName + file.getName();
     }
     
+    private static String readFile(File file) {
+        try {
+            byte[] bytes = Files.readAllBytes(file.toPath());
+            return new String(bytes, StandardCharsets.ISO_8859_1);
+        } catch (IOException e) {
+            throw new PhoxIOException(e.getMessage());
+        }
+    }
+    
     private static void handleFile(File file, String packageName) {
         final String fileName = file.getName();
         final String completeClassName = packageName + "." + fileName.substring(0, fileName.length() - PHOX_EXTENSION.length());
@@ -65,15 +73,6 @@ public final class Phox {
                     throw new IllegalArgumentException("Couldn't compile class. Reason: " + reason);
             case CompilerResponse.Success(List<Token> tokens) ->
                     System.out.println(tokens);
-        }
-    }
-    
-    private static String readFile(File file) {
-        try {
-            byte[] bytes = Files.readAllBytes(file.toPath());
-            return new String(bytes, StandardCharsets.ISO_8859_1);
-        } catch (IOException e) {
-            throw new PhoxIOException(e.getMessage());
         }
     }
 }
