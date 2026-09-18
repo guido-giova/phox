@@ -1,5 +1,8 @@
 package parser;
 
+import parser.exception.PhoxFileNotFoundException;
+import parser.exception.PhoxIOException;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -21,8 +24,7 @@ public final class Phox {
     private static void compile(String path) {
         File main = new File(path);
         if (! main.exists()) {
-            System.err.println("File not exists");
-            System.exit(1);
+            throw new PhoxFileNotFoundException(String.format("The file \"%s\" does not exist", path));
         }
         Phox.checkFileType(main, "");
     }
@@ -71,7 +73,7 @@ public final class Phox {
             byte[] bytes = Files.readAllBytes(file.toPath());
             return new String(bytes, StandardCharsets.ISO_8859_1);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new PhoxIOException(e.getMessage());
         }
     }
 }
