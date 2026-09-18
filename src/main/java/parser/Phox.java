@@ -25,25 +25,31 @@ public final class Phox {
         if (! main.exists()) {
             throw new PhoxFileNotFoundException(String.format("The file \"%s\" does not exist", path));
         }
-        Phox.checkFileType(main, "");
+        List<FileDefinition> definitions = Phox.checkFileType(main, "");
+        Coordinator.coordinate(definitions);
     }
     
-    private static void checkFileType(File file, String packageName) {
+    private static List<FileDefinition> checkFileType(File file, String packageName) {
         if (file.isFile() && file.getName().endsWith(PHOX_EXTENSION)) {
-            Phox.handleFile(file, packageName);
+            return List.of(Phox.handleFile(file, packageName));
         }
         if (file.isDirectory()) {
-            Phox.handleDirectory(file, packageName);
+            return Phox.handleDirectory(file, packageName);
         }
+        return List.of();
     }
     
-    private static void handleDirectory(File file, String packageName) {
+    private static List<FileDefinition> handleDirectory(File file, String packageName) {
         File[] children = file.listFiles();
-        if (children == null) {return;}
+        if (children == null) {return List.of();}
         
+        List<FileDefinition> definitions = new java.util.ArrayList<>();
         for (File child : children) {
-            Phox.checkFileType(child, Phox.getPackageName(file, packageName));
+            definitions.addAll(
+                Phox.checkFileType(child, Phox.getPackageName(file, packageName))
+            );
         }
+        return definitions;
     }
     
     private static String getPackageName(File file, String packageName) {
@@ -61,18 +67,12 @@ public final class Phox {
         }
     }
     
-    private static void handleFile(File file, String packageName) {
+    private static FileDefinition handleFile(File file, String packageName) {
         final String fileName = file.getName();
         final String completeClassName = packageName + "." + fileName.substring(0, fileName.length() - PHOX_EXTENSION.length());
         
         String fileText = Phox.readFile(file);
         
-        CompilerResponse response = Compiler.validate(fileText);
-        switch (response) {
-            case CompilerResponse.Failed(String reason) ->
-                    throw new IllegalArgumentException("Couldn't compile class. Reason: " + reason);
-            case CompilerResponse.Success(List<Token> tokens) ->
-                    System.out.println(tokens);
-        }
+        return new FileDefinition(completeClassName, fileText);
     }
 }
