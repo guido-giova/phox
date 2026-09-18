@@ -8,6 +8,8 @@ import java.nio.file.Files;
 import java.util.List;
 
 public final class Phox {
+    public static final String PHOX_EXTENSION = ".phox";
+    
     private Phox() {
         throw new UnsupportedOperationException("Don't instantiate Phox");
     }
@@ -26,7 +28,7 @@ public final class Phox {
     }
     
     private static void checkFileType(File file, String packageName) {
-        if (file.isFile() && file.getName().endsWith(".phox")) {
+        if (file.isFile() && file.getName().endsWith(PHOX_EXTENSION)) {
             Phox.handleFile(file, packageName);
         }
         if (file.isDirectory()) {
@@ -51,7 +53,7 @@ public final class Phox {
     
     private static void handleFile(File file, String packageName) {
         final String fileName = file.getName();
-        final String completeClassName = packageName + "." + fileName.substring(0, fileName.length() - ".phox".length());
+        final String completeClassName = packageName + "." + fileName.substring(0, fileName.length() - PHOX_EXTENSION.length());
         
         String fileText = Phox.readFile(file);
         
