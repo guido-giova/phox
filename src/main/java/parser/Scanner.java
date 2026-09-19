@@ -29,9 +29,16 @@ public class Scanner {
         while (ii < ll) {
             char cc = text.charAt(ii);
             
-            if (cc == '\"' || cc == '\'') {
+            if (cc == '\"') {
                 tokens.addAll(Lexer.tokenize(text.substring(ps, ii), ps));
                 ii = scanString(text, ii, cc, tokens);
+                ps = ii;
+                continue;
+            }
+            
+            if (cc == '\'') {
+                tokens.addAll(Lexer.tokenize(text.substring(ps, ii), ps));
+                ii = Scanner.scanChar(text, ii, cc, tokens);
                 ps = ii;
                 continue;
             }
@@ -54,6 +61,51 @@ public class Scanner {
         
         tokens.addAll(Lexer.tokenize(text.substring(ps, ll), ps));
         return tokens;
+    }
+    
+    private static int scanChar(String text, int start, char quote, List<Token> tokens) {
+        final int ll = text.length();
+        int ii = start + 1; // skip opening quote
+        
+        if (ii + 1 >= ll) {
+            throw new IllegalArgumentException("Character literal never closed at " + ii);
+        }
+        
+        char cc = text.charAt(ii);
+        if (cc == '\'') {
+            throw new IllegalArgumentException("Empty character literal at " + ii);
+        }
+        if (cc == '\\') {
+            if (ii + 1 >= ll) {
+                throw new IllegalArgumentException("Trailing escape character at " + ii);
+            }
+            char next = text.charAt(ii + 1);
+            switch (next) {
+                case 'n'  -> { cc = '\n'; ii += 2; }
+                case 't'  -> { cc = '\t'; ii += 2; }
+                case 'r'  -> { cc = '\r'; ii += 2; }
+                case '\\' -> { cc = '\\'; ii += 2; }
+                case '"'  -> { cc = '\"'; ii += 2; }
+                case '\'' -> { cc = '\''; ii += 2; }
+                case 'u'  -> {
+                    if (ii + 6 > ll) {
+                        throw new IllegalArgumentException("Invalid Unicode escape at " + ii);
+                    }
+                    String hex = text.substring(ii + 2, ii + 6);
+                    cc = (char) Integer.parseInt(hex, 16);
+                    ii += 6;
+                }
+                default -> throw new IllegalArgumentException("Unknown escape '\\" + next + "' at " + ii);
+            }
+        }
+        
+        char next = text.charAt(ii);
+        if (next != '\'') {
+            throw new IllegalArgumentException("Too many characters in character literal at " + ii);
+        }
+        
+        tokens.add(new Token.CharacterLiteral(start, cc));
+        return ii;
     }
     
     private static int scanString(String text, int start, char quote, List<Token> tokens) {
