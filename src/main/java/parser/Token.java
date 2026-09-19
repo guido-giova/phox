@@ -217,7 +217,9 @@ public sealed interface Token {
         /** Indicates the {@code enum} keyword*/
         ENUM("enum"),
         /** Indicates the {@code data} keyword*/
-        DATA("data");
+        DATA("data"),
+        /** Indicates the {@code single} keyword*/
+        SINGLE("single");
         final String text;
         TypeCreationKind(String text) {this.text = text;}
         @Override public String text() {return this.text;}
