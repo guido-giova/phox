@@ -1,5 +1,7 @@
 package parser;
 
+import parser.exception.PhoxSymbolExpectationException;
+
 import java.util.List;
 
 /**
@@ -66,7 +68,7 @@ public class TokenStream {
             return this.tokens.get(this.position - 1);
         }
         Token actual = this.peek();
-        throw new IllegalArgumentException("Expected " + kind + " at position " + (actual != null ? actual.start() : "EOF"));
+        throw new PhoxSymbolExpectationException(kind, actual);
     }
     
     /**
