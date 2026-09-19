@@ -17,4 +17,13 @@ public class PhoxIOException extends PhoxCompilationException {
     public PhoxIOException(String message) {
         super(message);
     }
+    
+    /**
+     * Constructs an io exception with the given cause.
+     *
+     * @param cause of the exception being thrown
+     */
+    public PhoxIOException(Throwable cause) {
+        super(cause);
+    }
 }

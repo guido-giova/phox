@@ -17,4 +17,13 @@ public class PhoxCompilationException extends RuntimeException {
     public PhoxCompilationException(String message) {
         super(message);
     }
+    
+    /**
+     * Constructs a compilation exception with the given cause.
+     *
+     * @param cause of the exception being thrown
+     */
+    public PhoxCompilationException(Throwable cause) {
+        super(cause);
+    }
 }
