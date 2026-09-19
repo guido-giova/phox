@@ -17,4 +17,13 @@ public class PhoxFileNotFoundException extends PhoxCompilationException {
     public PhoxFileNotFoundException(String message) {
         super(message);
     }
+    
+    /**
+     * Constructs a file not found exception with the given path, as 'File "path" does not exist'.
+     *
+     * @param path of file that does not exist
+     */
+    public PhoxFileNotFoundException(java.nio.file.Path path) {
+        this(String.format("File \"%s\" does not exist.", path));
+    }
 }
