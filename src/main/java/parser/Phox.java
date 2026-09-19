@@ -23,7 +23,7 @@ public final class Phox {
     
     private static void compile(Path path) {
         if (Files.notExists(path)) {
-            throw new PhoxFileNotFoundException(path.toString());
+            throw new PhoxFileNotFoundException(path);
         }
         List<FileDefinition> definitions = Phox.checkFileType(path, "");
         Coordinator.coordinate(definitions);
