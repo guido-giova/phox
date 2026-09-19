@@ -2,7 +2,11 @@ package parser;
 
 import java.util.List;
 
-public class Scanner {
+public final class Scanner {
+    private Scanner() {
+            throw new UnsupportedOperationException("Don't instantiate Scanner");
+        }
+    
     public static List<Token> scan(String text) {
         List<Token> tokens = new java.util.ArrayList<>();
         final int ll = text.length();
