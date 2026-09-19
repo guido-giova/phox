@@ -93,8 +93,8 @@ public sealed interface Token {
         BRACKET_OPEN('('),
         /** Caret symbol: {@code ^}*/
         CARET('^'),
-        /** Coma symbol: {@code ,} */
-        COMA(','),
+        /** Comma symbol: {@code ,} */
+        COMMA(','),
         /** Colon symbol: {@code :} */
         COLON(':'),
         /** Closing curly bracket symbol: <code>}</code> */
