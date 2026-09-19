@@ -10,11 +10,11 @@ public class PhoxFileNotFoundException extends PhoxCompilationException {
     private static final long serialVersionUID = -8399634482776253914L;
     
     /**
-     * Constructs a file not found exception with the given message.
+     * Constructs a file not found exception with the given path, as 'File "path" does not exist'.
      *
-     * @param message the reason for the exception
+     * @param path the reason for the exception
      */
-    public PhoxFileNotFoundException(String message) {
-        super(message);
+    public PhoxFileNotFoundException(String path) {
+        super(String.format("File \"%s\" does not exist.", path));
     }
 }
