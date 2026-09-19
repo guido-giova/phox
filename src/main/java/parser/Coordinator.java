@@ -2,11 +2,19 @@ package parser;
 
 import java.util.List;
 
+/**
+ * Distributes and organizes the information given to the different stages of compilation
+ */
 public final class Coordinator {
     private Coordinator() {
         throw new UnsupportedOperationException("Don't instantiate Coordinator");
     }
     
+    /**
+     * Runs a batch of source files through tokenizing, parsing, and type resolution.
+     *
+     * @param definitions raw file contents paired with their source metadata
+     */
     public static void coordinate(List<FileDefinition> definitions) {
         List<TreeDefinition> defined = definitions.stream()
                                                   .map(Coordinator::tokenize)
