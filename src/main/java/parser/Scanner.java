@@ -31,14 +31,14 @@ public class Scanner {
             
             if (cc == '\"') {
                 tokens.addAll(Lexer.tokenize(text.substring(ps, ii), ps));
-                ii = scanString(text, ii, cc, tokens);
+                ii = scanString(text, ii, tokens);
                 ps = ii;
                 continue;
             }
             
             if (cc == '\'') {
                 tokens.addAll(Lexer.tokenize(text.substring(ps, ii), ps));
-                ii = Scanner.scanChar(text, ii, cc, tokens);
+                ii = Scanner.scanChar(text, ii, tokens);
                 ps = ii;
                 continue;
             }
@@ -63,7 +63,7 @@ public class Scanner {
         return tokens;
     }
     
-    private static int scanChar(String text, int start, char quote, List<Token> tokens) {
+    private static int scanChar(String text, int start, List<Token> tokens) {
         final int ll = text.length();
         int ii = start + 1; // skip opening quote
         
@@ -108,7 +108,7 @@ public class Scanner {
         return ii;
     }
     
-    private static int scanString(String text, int start, char quote, List<Token> tokens) {
+    private static int scanString(String text, int start, List<Token> tokens) {
         final int ll = text.length();
         StringBuilder sb = new StringBuilder();
         int ii = start + 1; // skip opening quote
@@ -141,7 +141,7 @@ public class Scanner {
                 continue;
             }
             
-            if (cur == quote) {
+            if (cur == '\"') {
                 tokens.add(new Token.StringLiteral(start, sb.toString()));
                 return ii + 1;
             }
