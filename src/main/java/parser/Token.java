@@ -40,6 +40,14 @@ public sealed interface Token {
     record StringLiteral(int start, String str) implements Token {}
     
     /**
+     * Represents a literal character. For example {@code 'a'}.
+     *
+     * @param start     Beginning index in the class definition
+     * @param character Character itself
+     */
+    record CharacterLiteral(int start, char character) implements Token {}
+    
+    /**
      * Represents a whitespace.
      *
      * @param start Beginning index in the class definition
