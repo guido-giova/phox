@@ -16,11 +16,11 @@ public final class Coordinator {
      * @param definitions raw file contents paired with their source metadata
      */
     public static void coordinate(List<FileDefinition> definitions) {
-        List<TreeDefinition> defined = definitions.stream()
-                                                  .map(Coordinator::tokenize)
-                                                  .map(Coordinator::treeify)
-                                                  .toList();
-        TypeResolver.resolve(defined);
+        List<TreeDefinition> trees = definitions.stream()
+                                                .map(Coordinator::tokenize)
+                                                .map(Coordinator::treeify)
+                                                .toList();
+        TypeResolver.resolve(trees);
     }
     
     private static TokenizedDefinition tokenize(FileDefinition data) {
