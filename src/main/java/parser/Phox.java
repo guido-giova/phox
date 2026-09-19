@@ -3,10 +3,9 @@ package parser;
 import parser.exception.PhoxFileNotFoundException;
 import parser.exception.PhoxIOException;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 public final class Phox {
@@ -17,62 +16,59 @@ public final class Phox {
     }
     
     public static void compile(String[] path) {
-        Phox.compile(String.join(" ", path));
+        java.util.Arrays.stream(path)
+                        .map(Path::of)
+                        .forEach(Phox::compile);
     }
     
-    private static void compile(String path) {
-        File main = new File(path);
-        if (! main.exists()) {
+    private static void compile(Path path) {
+        if (Files.notExists(path)) {
             throw new PhoxFileNotFoundException(String.format("The file \"%s\" does not exist", path));
         }
-        List<FileDefinition> definitions = Phox.checkFileType(main, "");
+        List<FileDefinition> definitions = Phox.checkFileType(path, "");
         Coordinator.coordinate(definitions);
     }
     
-    private static List<FileDefinition> checkFileType(File file, String packageName) {
-        if (file.isFile() && file.getName().endsWith(PHOX_EXTENSION)) {
-            return List.of(Phox.handleFile(file, packageName));
+    private static List<FileDefinition> checkFileType(Path path, String packageName) {
+        if (Files.isRegularFile(path) && path.getFileName().toString().endsWith(PHOX_EXTENSION)) {
+            return List.of(Phox.handleFile(path, packageName));
         }
-        if (file.isDirectory()) {
-            return Phox.handleDirectory(file, packageName);
+        if (Files.isDirectory(path)) {
+            return Phox.handleDirectory(path, packageName);
         }
         return List.of();
     }
     
-    private static List<FileDefinition> handleDirectory(File file, String packageName) {
-        File[] children = file.listFiles();
-        if (children == null) {return List.of();}
-        
-        List<FileDefinition> definitions = new java.util.ArrayList<>();
-        for (File child : children) {
-            definitions.addAll(
-                Phox.checkFileType(child, Phox.getPackageName(file, packageName))
-            );
+    private static List<FileDefinition> handleDirectory(Path path, String packageName) {
+        String newPackageName = Phox.getPackageName(path, packageName);
+        try (java.util.stream.Stream<Path> children = Files.list(path)){
+            return children.flatMap(c -> Phox.checkFileType(c, newPackageName).stream())
+                           .toList();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        return definitions;
     }
     
-    private static String getPackageName(File file, String packageName) {
+    private static String getPackageName(Path path, String packageName) {
         String newPackageName = packageName;
         if (!packageName.isEmpty()) {newPackageName += ".";}
-        return newPackageName + file.getName();
+        return newPackageName + path.getFileName();
     }
     
-    private static String readFile(File file) {
+    private static String readFile(Path path) {
         try {
-            byte[] bytes = Files.readAllBytes(file.toPath());
-            return new String(bytes, StandardCharsets.ISO_8859_1);
+            byte[] bytes = Files.readAllBytes(path);
+            return new String(bytes, java.nio.charset.StandardCharsets.ISO_8859_1);
         } catch (IOException e) {
             throw new PhoxIOException(e.getMessage());
         }
     }
     
-    private static FileDefinition handleFile(File file, String packageName) {
-        final String fileName = file.getName();
-        final String completeClassName = packageName + "." + fileName.substring(0, fileName.length() - PHOX_EXTENSION.length());
-        
-        String fileText = Phox.readFile(file);
-        
-        return new FileDefinition(completeClassName, fileText);
+    private static FileDefinition handleFile(Path path, String packageName) {
+        final String fileName = path.getFileName().toString();
+        final String className = fileName.substring(0, fileName.length() - PHOX_EXTENSION.length());
+        final String fileText = Phox.readFile(path);
+        final SourceFile source = new SourceFile(packageName, className, path);
+        return new FileDefinition(source, fileText);
     }
 }

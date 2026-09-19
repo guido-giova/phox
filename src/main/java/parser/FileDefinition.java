@@ -1,6 +1,6 @@
 package parser;
 
 public record FileDefinition(
-        String filePackageName,
+        SourceFile source,
         String fileData
 ) {}
