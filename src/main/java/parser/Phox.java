@@ -6,6 +6,8 @@ import parser.exception.PhoxIOException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 public final class Phox {
@@ -16,17 +18,20 @@ public final class Phox {
     }
     
     public static void compile(String[] path) {
-        java.util.Arrays.stream(path)
-                        .map(Path::of)
-                        .forEach(Phox::compile);
+        Coordinator.coordinate(
+            Arrays.stream(path)
+                  .map(Path::of)
+                  .map(Phox::compile)
+                  .flatMap(Collection::stream)
+                  .toList()
+        );
     }
     
-    private static void compile(Path path) {
+    private static List<FileDefinition> compile(Path path) {
         if (Files.notExists(path)) {
             throw new PhoxFileNotFoundException(path);
         }
-        List<FileDefinition> definitions = Phox.checkFileType(path, "");
-        Coordinator.coordinate(definitions);
+        return Phox.checkFileType(path, "");
     }
     
     private static List<FileDefinition> checkFileType(Path path, String packageName) {
