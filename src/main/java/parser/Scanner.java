@@ -1,5 +1,7 @@
 package parser;
 
+import parser.exception.PhoxValidationException;
+
 import java.util.List;
 
 public class Scanner {
@@ -44,7 +46,7 @@ public class Scanner {
             
             if (cur == '\\') {
                 if (ii + 1 >= ll) {
-                    throw new ValidationException("Trailing escape character", ii);
+                    throw new PhoxValidationException("Trailing escape character", ii);
                 }
                 char next = text.charAt(ii + 1);
                 switch (next) {
@@ -56,13 +58,13 @@ public class Scanner {
                     case '\'' -> { sb.append('\''); ii += 2; }
                     case 'u'  -> {
                         if (ii + 6 > ll) {
-                            throw new ValidationException("Invalid Unicode escape", ii);
+                            throw new PhoxValidationException("Invalid Unicode escape", ii);
                         }
                         String hex = text.substring(ii + 2, ii + 6);
                         sb.append((char) Integer.parseInt(hex, 16));
                         ii += 6;
                     }
-                    default -> throw new ValidationException("Unknown escape '\\" + next + "'", ii);
+                    default -> throw new PhoxValidationException("Unknown escape '\\" + next + "'", ii);
                 }
                 continue;
             }
@@ -76,7 +78,7 @@ public class Scanner {
             ii++;
         }
         
-        throw new ValidationException("Unterminated string starting", start);
+        throw new PhoxValidationException("Unterminated string starting", start);
     }
     
     private static int scanComment(String text, int start, List<Token> tokens) {
@@ -93,6 +95,6 @@ public class Scanner {
             ii++;
         }
         
-        throw new ValidationException("Unterminated comment starting", start);
+        throw new PhoxValidationException("Unterminated comment starting", start);
     }
 }

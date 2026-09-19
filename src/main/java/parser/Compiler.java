@@ -1,5 +1,7 @@
 package parser;
 
+import parser.exception.PhoxValidationException;
+
 import java.util.List;
 
 /**
@@ -25,7 +27,7 @@ public final class Compiler {
             tokens = Identifier.identify(tokens);
             tokens = Cleaner.clean(tokens);
             return new CompilerResponse.Success(tokens);
-        } catch (ValidationException iae) {
+        } catch (PhoxValidationException iae) {
             return new CompilerResponse.Failed(iae.getLocalizedMessage());
         }
     }
