@@ -105,7 +105,7 @@ public class Scanner {
         }
         
         tokens.add(new Token.CharacterLiteral(start, cc));
-        return ii;
+        return ii + 1;
     }
     
     private static int scanString(String text, int start, List<Token> tokens) {
