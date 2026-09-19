@@ -3,7 +3,7 @@ package parser.exception;
 import java.io.Serial;
 
 /**
- * Runtime exception (unchecked) for when general IO failures or interruptions.
+ * Runtime exception (unchecked) for general IO failures or interruptions.
  */
 public class PhoxIOException extends PhoxCompilationException {
     @Serial
