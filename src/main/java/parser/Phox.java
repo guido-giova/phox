@@ -23,7 +23,7 @@ public final class Phox {
     
     private static void compile(Path path) {
         if (Files.notExists(path)) {
-            throw new PhoxFileNotFoundException(String.format("The file \"%s\" does not exist", path));
+            throw new PhoxFileNotFoundException(path.toString());
         }
         List<FileDefinition> definitions = Phox.checkFileType(path, "");
         Coordinator.coordinate(definitions);
@@ -45,7 +45,7 @@ public final class Phox {
             return children.flatMap(c -> Phox.checkFileType(c, newPackageName).stream())
                            .toList();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new PhoxIOException(e);
         }
     }
     
@@ -60,7 +60,7 @@ public final class Phox {
             byte[] bytes = Files.readAllBytes(path);
             return new String(bytes, java.nio.charset.StandardCharsets.ISO_8859_1);
         } catch (IOException e) {
-            throw new PhoxIOException(e.getMessage());
+            throw new PhoxIOException(e);
         }
     }
     
