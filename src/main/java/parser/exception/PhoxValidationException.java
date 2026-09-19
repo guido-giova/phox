@@ -1,11 +1,11 @@
-package parser;
+package parser.exception;
 
 import java.io.Serial;
 
 /**
  * Exception to indicate an error in validation of a Phox class
  */
-public class ValidationException extends RuntimeException {
+public class PhoxValidationException extends PhoxCompilationException {
     @Serial
     private static final long serialVersionUID = 3532412369150737442L;
     
@@ -14,7 +14,7 @@ public class ValidationException extends RuntimeException {
      *
      * @param message the reason
      */
-    public ValidationException(String message) {
+    public PhoxValidationException(String message) {
         super(message);
     }
     
@@ -25,7 +25,7 @@ public class ValidationException extends RuntimeException {
      * @param message the reason
      * @param at      the index of the error
      */
-    public ValidationException(String message, int at) {
+    public PhoxValidationException(String message, int at) {
         this(String.format("%s at %d", message, at));
     }
 }
