@@ -65,27 +65,9 @@ public class Scanner {
             char cur = text.charAt(ii);
             
             if (cur == '\\') {
-                if (ii + 1 >= ll) {
-                    throw new IllegalArgumentException("Trailing escape character at " + ii);
-                }
-                char next = text.charAt(ii + 1);
-                switch (next) {
-                    case 'n'  -> { sb.append('\n'); ii += 2; }
-                    case 't'  -> { sb.append('\t'); ii += 2; }
-                    case 'r'  -> { sb.append('\r'); ii += 2; }
-                    case '\\' -> { sb.append('\\'); ii += 2; }
-                    case '"'  -> { sb.append('\"'); ii += 2; }
-                    case '\'' -> { sb.append('\''); ii += 2; }
-                    case 'u'  -> {
-                        if (ii + 6 > ll) {
-                            throw new IllegalArgumentException("Invalid Unicode escape at " + ii);
-                        }
-                        String hex = text.substring(ii + 2, ii + 6);
-                        sb.append((char) Integer.parseInt(hex, 16));
-                        ii += 6;
-                    }
-                    default -> throw new IllegalArgumentException("Unknown escape '\\" + next + "' at " + ii);
-                }
+                EscapedCharacterAndIndex escapedCharacterAndIndex = Scanner.scanEscapedCharacter(text, ii);
+                sb.append(escapedCharacterAndIndex.escapedChar());
+                ii = escapedCharacterAndIndex.index();
                 continue;
             }
             
@@ -99,6 +81,35 @@ public class Scanner {
         }
         
         throw new IllegalArgumentException("Unterminated string starting at " + start);
+    }
+    
+    private record EscapedCharacterAndIndex(char escapedChar, int index) {}
+    
+    private static EscapedCharacterAndIndex scanEscapedCharacter(String text, int ii) {
+        final int ll = text.length();
+        if (ii + 1 >= ll) {
+            throw new IllegalArgumentException("Trailing escape character at " + ii);
+        }
+        char next = text.charAt(ii + 1);
+        char escaped;
+        switch (next) {
+            case 'n'  -> { ii += 2; escaped = '\n'; }
+            case 't'  -> { ii += 2; escaped = '\t'; }
+            case 'r'  -> { ii += 2; escaped = '\r'; }
+            case '\\' -> { ii += 2; escaped = '\\'; }
+            case '"'  -> { ii += 2; escaped = '\"'; }
+            case '\'' -> { ii += 2; escaped = '\''; }
+            case 'u'  -> {
+                if (ii + 6 > ll) {
+                    throw new IllegalArgumentException("Invalid Unicode escape at " + ii);
+                }
+                String hex = text.substring(ii + 2, ii + 6);
+                ii += 6;
+                escaped = (char) Integer.parseInt(hex, 16);
+            }
+            default -> throw new IllegalArgumentException("Unknown escape '\\" + next + "' at " + ii);
+        }
+        return new EscapedCharacterAndIndex(escaped, ii);
     }
     
     private static int scanComment(String text, int start, List<Token> tokens) {
