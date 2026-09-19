@@ -8,8 +8,11 @@ public final class Coordinator {
     }
     
     public static void coordinate(List<FileDefinition> definitions) {
-        definitions.stream()
-                   .map(Coordinator::tokenize);
+        List<TreeDefinition> defined = definitions.stream()
+                                                  .map(Coordinator::tokenize)
+                                                  .map(Coordinator::treeify)
+                                                  .toList();
+        TypeResolver.resolve(defined);
     }
     
     private static TokenizedDefinition tokenize(FileDefinition data) {
@@ -18,5 +21,9 @@ public final class Coordinator {
         tokens = Identifier.identify(tokens);
         tokens = Cleaner.clean(tokens);
         return new TokenizedDefinition(data.source(), tokens);
+    }
+    
+    private static TreeDefinition treeify(TokenizedDefinition data) {
+        return new TreeDefinition(data.source(), Syntaxer.resolve(data.tokens()));
     }
 }
