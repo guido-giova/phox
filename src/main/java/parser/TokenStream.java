@@ -70,6 +70,15 @@ public class TokenStream {
     }
     
     /**
+     * Expect a semicolon ';'.
+     *
+     * @return the current semicolon token
+     */
+    public Token expectSemicolon() {
+        return this.expectSymbol(Token.SymbolKind.SEMICOLON);
+    }
+    
+    /**
      * @return {@code true} if there are more tokens, {@code false} otherwise
      */
     public boolean hasNext() {
