@@ -185,7 +185,9 @@ public sealed interface Token {
         /** Indicates the {@code for} keyword*/
         FOR("for"),
         /** Indicates the {@code while} keyword*/
-        WHILE("while")
+        WHILE("while"),
+        /** Indicates the {@code switch} keyword*/
+        SWITCH("switch")
         ;
         final String text;
         FlowTypeKind(String text) {this.text = text;}
