@@ -116,6 +116,10 @@ public class Scanner {
             this.index++;
         }
         
+        if (this.index >= this.length) {
+            throw new IllegalArgumentException("Character literal never closed at " + this.index);
+        }
+        
         char next = text.charAt(this.index);
         if (next != '\'') {
             throw new IllegalArgumentException("Too many characters in character literal at " + this.index);
