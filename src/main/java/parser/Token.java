@@ -62,6 +62,7 @@ public sealed interface Token {
      * @param start Beginning index in the class definition
      * @param str   Comment itself
      */
+    record Comment(int start, String str) implements Token {}
     
     /**
      * Represents a reserved keyword.
