@@ -79,7 +79,7 @@ public class NumberScanner {
     
     private boolean hasNext() {return this.index <= this.length;}
     
-    private boolean hasNNext(int count) {return this.index + count < this.length;}
+    private boolean hasNext(int count) {return this.index + count < this.length;}
     
     
     
@@ -139,7 +139,7 @@ public class NumberScanner {
             if (isDigit.test(cc)) {
                 sb.append(cc);
                 this.index++;
-            } else if (cc == '_' && this.hasNNext(1) && isDigit.test(this.text.charAt(this.index + 1))) {
+            } else if (cc == '_' && this.hasNext(1) && isDigit.test(this.text.charAt(this.index + 1))) {
                 this.index++; // skip separator; loop consumes the digit right after it
             } else {
                 return sb.toString();
