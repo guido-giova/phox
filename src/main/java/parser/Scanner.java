@@ -73,6 +73,7 @@ public class Scanner {
     private Token scanString() {
         StringBuilder sb = new StringBuilder();
         this.index++; // skip opening quote
+        final int start = this.index;
         
         while (this.index < this.length) {
             char cur = this.text.charAt(this.index);
@@ -84,7 +85,7 @@ public class Scanner {
             
             if (cur == '\"') {
                 this.index++;
-                return new Token.StringLiteral(this.index - 1, sb.toString());
+                return new Token.StringLiteral(this.index - 1, this.text.substring(start, this.index - 1), sb.toString());
             }
             
             sb.append(cur);
@@ -96,6 +97,7 @@ public class Scanner {
     
     private Token scanChar() {
         this.index++; // skip opening quote
+        final int start = this.index;
         
         if (this.index + 1 >= this.length) {
             throw new IllegalArgumentException("Character literal never closed at " + this.index);
@@ -116,7 +118,7 @@ public class Scanner {
         }
         
         this.index++;
-        return new Token.CharacterLiteral(this.index - 1, cc);
+        return new Token.CharacterLiteral(this.index - 1, this.text.substring(start, this.index), cc);
     }
     
     private char scanEscapedCharacter() {

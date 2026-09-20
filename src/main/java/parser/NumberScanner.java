@@ -85,7 +85,7 @@ public class NumberScanner {
     
     private Token createNumberliteralToken() {
         System.out.println(this);
-        return new Token.NumberLiteral.Float64(this.beginIndex, 0.0d);
+        return new Token.NumberLiteral.Float64(this.beginIndex, "0.0d", 0.0d);
     }
     
     private void scanDecimalNumber() {
