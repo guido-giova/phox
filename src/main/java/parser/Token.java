@@ -24,7 +24,7 @@ public sealed interface Token {
     record Word(int start, String str) implements Token {}
     
     /**
-     * Represents a literal number written. For example {@code 2} or {@code 1.5e10i32}.
+     * Represents a literal number written. For example {@code 2} or {@code 0f32x19.fs-2}.
      */
     sealed interface NumberLiteral extends Token {
         /**
