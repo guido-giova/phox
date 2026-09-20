@@ -23,6 +23,16 @@ public class Scanner {
         return this.index < this.length;
     }
     
+    private int consume(int n) {
+        int lastIndex = this.index;
+        this.index += n;
+        return lastIndex;
+    }
+    
+    private int consume() {
+        return this.consume(1);
+    }
+    
     private void tokenizeAndAddToList(List<Token> tokens, int beginIndex, int endIndex) {
         String substring = this.text.substring(beginIndex, endIndex);
         List<Token> tokenized = Lexer.tokenize(substring, beginIndex);
@@ -65,7 +75,7 @@ public class Scanner {
                 continue;
             }
             
-            this.index++;
+            this.consume();
         }
         
         this.tokenizeAndAddToList(tokens, lastIndex, this.length);
@@ -74,8 +84,7 @@ public class Scanner {
     
     private Token scanString() {
         StringBuilder sb = new StringBuilder();
-        final int start = this.index;
-        this.index++; // skip opening quote
+        final int start = this.consume(); // skip opening quote
         
         while (this.index < this.length) {
             char cur = this.text.charAt(this.index);
@@ -86,20 +95,19 @@ public class Scanner {
             }
             
             if (cur == '\"') {
-                this.index++;
+                this.consume();
                 return new Token.StringLiteral(start, this.text.substring(start + 1, this.index - 1), sb.toString());
             }
             
             sb.append(cur);
-            this.index++;
+            this.consume();
         }
         
         throw new IllegalArgumentException("Unterminated string starting at " + this.index);
     }
     
     private Token scanChar() {
-        final int start = this.index;
-        this.index++; // skip opening quote
+        final int start = this.consume(); // skip opening quote
         
         if (this.index + 1 >= this.length) {
             throw new IllegalArgumentException("Character literal never closed at " + this.index);
@@ -113,7 +121,7 @@ public class Scanner {
         if (cc == '\\') {
             cc = this.scanEscapedCharacter();
         } else {
-            this.index++;
+            this.consume();
         }
         
         if (this.index >= this.length) {
@@ -125,7 +133,7 @@ public class Scanner {
             throw new IllegalArgumentException("Too many characters in character literal at " + this.index);
         }
         
-        this.index++;
+        this.consume();
         return new Token.CharacterLiteral(start, this.text.substring(start + 1, this.index - 1), cc);
     }
     
@@ -157,16 +165,15 @@ public class Scanner {
     
     private Token scanComment() {
         StringBuilder sb = new StringBuilder();
-        final int start = this.index;
-        this.index += 2; // skip opening "/*"
+        final int start = this.consume(2); // skip opening "/*"
         
         while (this.index < this.length - 1) {
             if (this.text.charAt(this.index) == '*' && text.charAt(this.index + 1) == '/') {
-                this.index += 2;
+                this.consume(2);
                 return new Token.Comment(start, sb.toString());
             }
             sb.append(this.text.charAt(this.index));
-            this.index++;
+            this.consume();
         }
         
         throw new IllegalArgumentException("Unterminated comment starting at " + this.index);
