@@ -12,7 +12,12 @@ public sealed interface Token {
     int start();
     
     record Word(int start, String str) implements Token {}
-    record NumberLiteral(int start, String str) implements Token {}
+    sealed interface NumberLiteral extends Token {
+        record Int32(int start, int value)      implements NumberLiteral {}
+        record Int64(int start, long value)     implements NumberLiteral {}
+        record Float32(int start, float value)  implements NumberLiteral {}
+        record Float64(int start, double value) implements NumberLiteral {}
+    }
     record Whitespace(int start, String str) implements Token {}
     record StringLiteral(int start, String str) implements Token {}
     record CharacterLiteral(int start, char value) implements Token {}
