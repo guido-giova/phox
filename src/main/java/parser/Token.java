@@ -22,14 +22,15 @@ public sealed interface Token {
      * @param str   Value itself
      */
     record Word(int start, String str) implements Token {}
-    
     /**
      * Represents a literal number written. For example {@code 2} or {@code 1.5e10i32}.
-     *
-     * @param start Beginning index in the class definition
-     * @param str   Number itself
      */
-    record NumberLiteral(int start, String str) implements Token {}
+    sealed interface NumberLiteral extends Token {
+        record Int32(int start, int value)      implements NumberLiteral {}
+        record Int64(int start, long value)     implements NumberLiteral {}
+        record Float32(int start, float value)  implements NumberLiteral {}
+        record Float64(int start, double value) implements NumberLiteral {}
+    }
     
     /**
      * Represents a literal string. For example {@code "abc"}.
@@ -61,7 +62,6 @@ public sealed interface Token {
      * @param start Beginning index in the class definition
      * @param str   Comment itself
      */
-    record Comment(int start, String str) implements Token {}
     
     /**
      * Represents a reserved keyword.

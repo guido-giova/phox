@@ -1,98 +1,169 @@
 package parser;
 
+import utils.Chars;
+
 import java.util.List;
 
 public class Scanner {
+    private final String text;
+    private final int length;
+    private int index;
+    
+    private Scanner(String text) {
+        this.text   = text;
+        this.length = text.length();
+        this.index  = 0;
+    }
+    
     public static List<Token> scan(String text) {
+        return new Scanner(text).scan();
+    }
+    
+    private boolean hasNext() {
+        return this.index < this.length;
+    }
+    
+    private void tokenizeAndAddToList(List<Token> tokens, int beginIndex, int endIndex) {
+        String substring = this.text.substring(beginIndex, endIndex);
+        List<Token> tokenized = Lexer.tokenize(substring, beginIndex);
+        tokens.addAll(tokenized);
+    }
+    
+    private List<Token> scan() {
         List<Token> tokens = new java.util.ArrayList<>();
-        final int ll = text.length();
-        int ii = 0;
-        int ps = 0;
+        int lastIndex = 0;
         
-        while (ii < ll) {
-            char c = text.charAt(ii);
+        while (this.index < this.length) {
+            char cc = this.text.charAt(this.index);
             
-            if (c == '\"' || c == '\'') {
-                tokens.addAll(Lexer.tokenize(text.substring(ps, ii), ps));
-                ii = scanString(text, ii, c, tokens);
-                ps = ii;
+            if (cc == '\"') {
+                this.tokenizeAndAddToList(tokens, lastIndex, this.index);
+                tokens.add(this.scanString());
+                lastIndex = this.index;
                 continue;
             }
             
-            if (c == '/' && ii + 1 < ll && text.charAt(ii + 1) == '*') {
-                tokens.addAll(Lexer.tokenize(text.substring(ps, ii), ps));
-                ii = scanComment(text, ii, tokens);
-                ps = ii;
+            if (cc == '\'') {
+                this.tokenizeAndAddToList(tokens, lastIndex, this.index);
+                tokens.add(this.scanChar());
+                lastIndex = this.index;
                 continue;
             }
             
+            if (cc == '/' && this.index + 1 < this.length && text.charAt(this.index + 1) == '*') {
+                this.tokenizeAndAddToList(tokens, lastIndex, this.index);
+                tokens.add(this.scanComment());
+                lastIndex = this.index;
+                continue;
+            }
             
-            ii++;
+            boolean atIdentifierBoundary = (this.index == 0) || !Chars.isIdentifierChar(text.charAt(this.index - 1));
+            if (Chars.isDecDigit(cc) && atIdentifierBoundary) {
+                this.tokenizeAndAddToList(tokens, lastIndex, this.index);
+                tokens.add(this.scanNumber());
+                lastIndex = this.index;
+            }
+            this.index++;
         }
         
-        tokens.addAll(Lexer.tokenize(text.substring(ps, ll), ps));
+        this.tokenizeAndAddToList(tokens, lastIndex, this.length);
         return tokens;
     }
     
-    private static int scanString(String text, int start, char quote, List<Token> tokens) {
-        final int ll = text.length();
+    private Token scanString() {
         StringBuilder sb = new StringBuilder();
-        int ii = start + 1; // skip opening quote
+        this.index++; // skip opening quote
         
-        while (ii < ll) {
-            char cur = text.charAt(ii);
+        while (this.index < this.length) {
+            char cur = this.text.charAt(this.index);
             
             if (cur == '\\') {
-                if (ii + 1 >= ll) {
-                    throw new IllegalArgumentException("Trailing escape character at " + ii);
-                }
-                char next = text.charAt(ii + 1);
-                switch (next) {
-                    case 'n'  -> { sb.append('\n'); ii += 2; }
-                    case 't'  -> { sb.append('\t'); ii += 2; }
-                    case 'r'  -> { sb.append('\r'); ii += 2; }
-                    case '\\' -> { sb.append('\\'); ii += 2; }
-                    case '"'  -> { sb.append('\"'); ii += 2; }
-                    case '\'' -> { sb.append('\''); ii += 2; }
-                    case 'u'  -> {
-                        if (ii + 6 > ll) {
-                            throw new IllegalArgumentException("Invalid Unicode escape at " + ii);
-                        }
-                        String hex = text.substring(ii + 2, ii + 6);
-                        sb.append((char) Integer.parseInt(hex, 16));
-                        ii += 6;
-                    }
-                    default -> throw new IllegalArgumentException("Unknown escape '\\" + next + "' at " + ii);
-                }
+                sb.append(this.scanEscapedCharacter());
                 continue;
             }
             
-            if (cur == quote) {
-                tokens.add(new Token.StringLiteral(start, sb.toString()));
-                return ii + 1;
+            if (cur == '\"') {
+                this.index++;
+                return new Token.StringLiteral(this.index - 1, sb.toString());
             }
             
             sb.append(cur);
-            ii++;
+            this.index++;
         }
         
-        throw new IllegalArgumentException("Unterminated string starting at " + start);
+        throw new IllegalArgumentException("Unterminated string starting at " + this.index);
     }
     
-    private static int scanComment(String text, int start, List<Token> tokens) {
-        final int ll = text.length();
-        StringBuilder sb = new StringBuilder();
-        int ii = start + 2; // skip opening "/*"
+    private Token scanChar() {
+        this.index++; // skip opening quote
         
-        while (ii < ll - 1) {
-            if (text.charAt(ii) == '*' && text.charAt(ii + 1) == '/') {
-                tokens.add(new Token.Comment(start, sb.toString()));
-                return ii + 2;
-            }
-            sb.append(text.charAt(ii));
-            ii++;
+        if (this.index + 1 >= this.length) {
+            throw new IllegalArgumentException("Character literal never closed at " + this.index);
         }
         
-        throw new IllegalArgumentException("Unterminated comment starting at " + start);
+        char cc = text.charAt(this.index);
+        if (cc == '\'') {
+            throw new IllegalArgumentException("Empty character literal at " + this.index);
+        }
+        
+        if (cc == '\\') {
+            cc = this.scanEscapedCharacter();
+        }
+        
+        char next = text.charAt(this.index);
+        if (next != '\'') {
+            throw new IllegalArgumentException("Too many characters in character literal at " + this.index);
+        }
+        
+        this.index++;
+        return new Token.CharacterLiteral(this.index - 1, cc);
+    }
+    
+    private char scanEscapedCharacter() {
+        if (this.index + 1 >= this.length) {
+            throw new IllegalArgumentException("Trailing escape character at " + this.index);
+        }
+        char next = this.text.charAt(this.index + 1);
+        char escaped;
+        switch (next) {
+            case 'n'  -> { this.index += 2; escaped = '\n'; }
+            case 't'  -> { this.index += 2; escaped = '\t'; }
+            case 'r'  -> { this.index += 2; escaped = '\r'; }
+            case '\\' -> { this.index += 2; escaped = '\\'; }
+            case '"'  -> { this.index += 2; escaped = '\"'; }
+            case '\'' -> { this.index += 2; escaped = '\''; }
+            case 'u'  -> {
+                if (this.index + 6 > this.length) {
+                    throw new IllegalArgumentException("Invalid Unicode escape at " + this.index);
+                }
+                String hex = this.text.substring(this.index + 2, this.index + 6);
+                this.index += 6;
+                escaped = (char) Integer.parseInt(hex, 16);
+            }
+            default -> throw new IllegalArgumentException("Unknown escape '\\" + next + "' at " + this.index);
+        }
+        return escaped;
+    }
+    
+    private Token scanComment() {
+        StringBuilder sb = new StringBuilder();
+        this.index++; // skip opening "/*"
+        
+        while (this.index < this.length - 1) {
+            if (this.text.charAt(this.index) == '*' && text.charAt(this.index + 1) == '/') {
+                this.index += 2;
+                return new Token.Comment(this.index - 2, sb.toString());
+            }
+            sb.append(this.text.charAt(this.index));
+            this.index++;
+        }
+        
+        throw new IllegalArgumentException("Unterminated comment starting at " + this.index);
+    }
+    
+    private Token scanNumber() {
+        NumberScanner.NumberScannerResponse response = NumberScanner.scanNumber(this.text, this.index);
+        this.index = response.endIndex();
+        return response.token();
     }
 }
