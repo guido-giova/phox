@@ -8,11 +8,26 @@ import java.util.Optional;
  */
 public sealed interface Token {
     /**
-     * Determines where the token starts
+     * Defines where the token starts
      *
      * @return index where the token begins
      */
     int start();
+    
+    /**
+     * Defines the amount of symbol the token encapsulates.
+     * @return the length of the token's value
+     */
+    int length();
+    
+    /**
+     * Defines the index where the token ends (exclusive).
+     *
+     * @return the index where the token ends.
+     */
+    default int end() {
+        return this.start() + this.length();
+    }
     
     /**
      * Represents any group of alphanumeric symbols that isn't a keyword. This represents class names, variable names,
@@ -21,57 +36,85 @@ public sealed interface Token {
      * @param start Beginning index in the class definition
      * @param str   Value itself
      */
-    record Word(int start, String str) implements Token {}
+    record Word(int start, String str) implements Token {
+        @Override
+        public int length() {return this.str.length();}
+    }
     
     /**
      * Represents a literal number written. For example {@code 2} or {@code 1.5e10i32}.
      */
     sealed interface NumberLiteral extends Token {
         /**
+         * @return the raw data of the number literal
+         */
+        String raw();
+        
+        @Override
+        default int length() {
+            return this.raw().length();
+        }
+        
+        /**
          * Represents a 32-bit integer.
          *
          * @param start Beginning index in the class definition
+         * @param raw   The raw data of the number literal
          * @param value The value itself
          */
-        record Int32(int start, int value)      implements NumberLiteral {}
+        record Int32(int start, String raw, int value) implements NumberLiteral {}
+        
         /**
          * Represents a 64-bit integer.
          *
          * @param start Beginning index in the class definition
+         * @param raw   The raw data of the number literal
          * @param value The value itself
          */
-        record Int64(int start, long value)     implements NumberLiteral {}
+        record Int64(int start, String raw, long value) implements NumberLiteral {}
+        
         /**
          * Represents a 32-bit float.
          *
          * @param start Beginning index in the class definition
+         * @param raw   The raw data of the number literal
          * @param value The value itself
          */
-        record Float32(int start, float value)  implements NumberLiteral {}
+        record Float32(int start, String raw, float value) implements NumberLiteral {}
+        
         /**
          * Represents a 64-bit float.
          *
          * @param start Beginning index in the class definition
+         * @param raw   The raw data of the number literal
          * @param value The value itself
          */
-        record Float64(int start, double value) implements NumberLiteral {}
+        record Float64(int start, String raw, double value) implements NumberLiteral {}
     }
     
     /**
      * Represents a literal string. For example {@code "abc"}.
      *
      * @param start Beginning index in the class definition
+     * @param raw   The raw data of the string literal
      * @param str   String itself
      */
-    record StringLiteral(int start, String str) implements Token {}
+    record StringLiteral(int start, String raw, String str) implements Token {
+        @Override
+        public int length() {return this.raw.length();}
+    }
     
     /**
      * Represents a literal character. For example {@code 'a'}.
      *
      * @param start     Beginning index in the class definition
+     * @param raw       The raw data of the character literal
      * @param character Character itself
      */
-    record CharacterLiteral(int start, char character) implements Token {}
+    record CharacterLiteral(int start, String raw, char character) implements Token {
+        @Override
+        public int length() {return this.raw.length();}
+    }
     
     /**
      * Represents a whitespace.
@@ -79,7 +122,10 @@ public sealed interface Token {
      * @param start Beginning index in the class definition
      * @param str   Whitespace itself
      */
-    record Whitespace(int start, String str) implements Token {}
+    record Whitespace(int start, String str) implements Token {
+        @Override
+        public int length() {return this.str.length();}
+    }
     
     /**
      * Represents the comment itself.
@@ -87,7 +133,10 @@ public sealed interface Token {
      * @param start Beginning index in the class definition
      * @param str   Comment itself
      */
-    record Comment(int start, String str) implements Token {}
+    record Comment(int start, String str) implements Token {
+        @Override
+        public int length() {return this.str.length();}
+    }
     
     /**
      * Represents a reserved keyword.
@@ -96,7 +145,10 @@ public sealed interface Token {
      * @param kind  Keyword itself
      * @see KeywordKind
      */
-    record Keyword(int start, KeywordKind kind) implements Token {}
+    record Keyword(int start, KeywordKind kind) implements Token {
+        @Override
+        public int length() {return this.kind.text().length();}
+    }
     
     /**
      * Represents a special character.
@@ -107,6 +159,8 @@ public sealed interface Token {
      */
     record Symbol(int start, SymbolKind kind) implements Token {
         char symbol() {return kind.ch;}
+        @Override
+        public int length() {return 1;}
     }
     
     /**
