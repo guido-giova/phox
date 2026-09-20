@@ -101,7 +101,7 @@ public sealed interface Token {
      */
     record StringLiteral(int start, String raw, String str) implements Token {
         @Override
-        public int length() {return this.raw.length();}
+        public int length() {return "\"".length() + this.raw.length() + "\"".length();}
     }
     
     /**
@@ -113,7 +113,7 @@ public sealed interface Token {
      */
     record CharacterLiteral(int start, String raw, char character) implements Token {
         @Override
-        public int length() {return this.raw.length();}
+        public int length() {return "'".length() + this.raw.length() + "'".length();}
     }
     
     /**
@@ -135,7 +135,7 @@ public sealed interface Token {
      */
     record Comment(int start, String str) implements Token {
         @Override
-        public int length() {return this.str.length();}
+        public int length() {return "/*".length() + this.str.length() + "*/".length();}
     }
     
     /**

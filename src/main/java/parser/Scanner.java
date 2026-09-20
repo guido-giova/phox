@@ -62,7 +62,9 @@ public class Scanner {
                 this.tokenizeAndAddToList(tokens, lastIndex, this.index);
                 tokens.add(this.scanNumber());
                 lastIndex = this.index;
+                continue;
             }
+            
             this.index++;
         }
         
@@ -72,8 +74,8 @@ public class Scanner {
     
     private Token scanString() {
         StringBuilder sb = new StringBuilder();
-        this.index++; // skip opening quote
         final int start = this.index;
+        this.index++; // skip opening quote
         
         while (this.index < this.length) {
             char cur = this.text.charAt(this.index);
@@ -85,7 +87,7 @@ public class Scanner {
             
             if (cur == '\"') {
                 this.index++;
-                return new Token.StringLiteral(this.index - 1, this.text.substring(start, this.index - 1), sb.toString());
+                return new Token.StringLiteral(start, this.text.substring(start + 1, this.index - 1), sb.toString());
             }
             
             sb.append(cur);
@@ -96,8 +98,8 @@ public class Scanner {
     }
     
     private Token scanChar() {
-        this.index++; // skip opening quote
         final int start = this.index;
+        this.index++; // skip opening quote
         
         if (this.index + 1 >= this.length) {
             throw new IllegalArgumentException("Character literal never closed at " + this.index);
@@ -110,6 +112,8 @@ public class Scanner {
         
         if (cc == '\\') {
             cc = this.scanEscapedCharacter();
+        } else {
+            this.index++;
         }
         
         char next = text.charAt(this.index);
@@ -118,7 +122,7 @@ public class Scanner {
         }
         
         this.index++;
-        return new Token.CharacterLiteral(this.index - 1, this.text.substring(start, this.index), cc);
+        return new Token.CharacterLiteral(start, this.text.substring(start + 1, this.index - 1), cc);
     }
     
     private char scanEscapedCharacter() {
@@ -149,12 +153,13 @@ public class Scanner {
     
     private Token scanComment() {
         StringBuilder sb = new StringBuilder();
-        this.index++; // skip opening "/*"
+        final int start = this.index;
+        this.index += 2; // skip opening "/*"
         
         while (this.index < this.length - 1) {
             if (this.text.charAt(this.index) == '*' && text.charAt(this.index + 1) == '/') {
                 this.index += 2;
-                return new Token.Comment(this.index - 2, sb.toString());
+                return new Token.Comment(start, sb.toString());
             }
             sb.append(this.text.charAt(this.index));
             this.index++;
