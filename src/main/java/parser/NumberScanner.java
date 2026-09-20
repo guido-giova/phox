@@ -77,7 +77,7 @@ public class NumberScanner {
                         .findFirst();
     }
     
-    private boolean hasNext() {return this.index <= this.length;}
+    private boolean hasNext() {return this.hasNext(1);}
     
     private boolean hasNext(int count) {return this.index + count < this.length;}
     
