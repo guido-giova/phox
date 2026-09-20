@@ -3,7 +3,6 @@ package parser;
 import utils.CharPredicate;
 import utils.Chars;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 
@@ -68,12 +67,28 @@ public class NumberScanner {
         this.exponentPart = null;
     }
     
+    private char getCurrent() {return this.text.charAt(this.index);}
+    
+    private boolean isCurrentPeriod() {return this.getCurrent() == '.';}
+    
+    private Optional<Exponent> isCurrentExponent() {
+        return java.util.Arrays.stream(Exponent.values())
+                        .filter(e -> e.symbol == this.getCurrent())
+                        .findFirst();
+    }
+    
+    private boolean hasNext() {return this.index <= this.length;}
+    
+    private boolean hasNNext(int count) {return this.index + count < this.length;}
+    
+    
+    
     static NumberScannerResponse scanNumber(String text, int beginIndex) {
         return new NumberScanner(text, beginIndex).scanNumber();
     }
     
     private NumberScannerResponse scanNumber() {
-        if (getCurrent() != '0') {
+        if (this.getCurrent() != '0') {
             this.scanDecimalNumber();
             return new NumberScannerResponse(this.createNumberliteralToken(), this.index);
         }
@@ -112,28 +127,6 @@ public class NumberScanner {
             }
             this.exponentPart = exponentPart + this.consumeDigitRun(Chars::isDecDigit);
         }
-    }
-    
-    private char getCurrent() {
-        return this.text.charAt(this.index);
-    }
-    
-    private boolean isCurrentPeriod() {
-        return this.getCurrent() == '.';
-    }
-    
-    private Optional<Exponent> isCurrentExponent() {
-        return Arrays.stream(Exponent.values())
-                     .filter(e -> e.symbol == this.getCurrent())
-                     .findFirst();
-    }
-    
-    private boolean hasNext() {
-        return this.index <= this.length;
-    }
-    
-    private boolean hasNNext(int count) {
-        return this.index + count < this.length;
     }
     
     private String consumeDigitRun(CharPredicate isDigit) {
