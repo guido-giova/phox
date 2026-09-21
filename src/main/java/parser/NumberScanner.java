@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
 import java.util.Arrays;
-import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 public class NumberScanner {
@@ -49,14 +49,29 @@ public class NumberScanner {
         }
     }
     
-    record NumberScannerResponse(Token token, int endIndex) {}
+    private enum TypePrefix {
+        INT32("i32"),
+        INT64("i64"),
+        FLOAT32("f32"),
+        FLOAT64("f64");
+        
+        final String prefix;
+        TypePrefix(String prefix) {
+            this.prefix = prefix;
+        }
+        
+        public static Optional<TypePrefix> getByPrefix(String prefix) {
+            return Arrays.stream(TypePrefix.values())
+                         .filter(e -> Objects.equals(e.prefix, prefix))
+                         .findFirst();
+        }
+        
+        public static boolean isFloatingPoint(TypePrefix kind) {
+            return kind == FLOAT32 || kind == FLOAT64;
+        }
+    }
     
-    private static final Map<String, Token.DataTypeKind> PREFIXES = Map.of(
-            "i32", Token.DataTypeKind.INT32,
-            "i64", Token.DataTypeKind.INT64,
-            "f32", Token.DataTypeKind.FLOAT32,
-            "f64", Token.DataTypeKind.FLOAT64
-    );
+    record NumberScannerResponse(Token token, int endIndex) {}
     
     private final String text;
     private final int length;
@@ -64,8 +79,8 @@ public class NumberScanner {
     private int index;
     
     private BigDecimal value;
-    private Token.DataTypeKind kind;
-    private Token.DataTypeKind desiredKind;
+    private TypePrefix kind;
+    private TypePrefix desiredKind;
     private Base base;
     private String wholePart;
     private String decimalPart;
@@ -78,12 +93,12 @@ public class NumberScanner {
         this.beginIndex = beginIndex;
         this.index      = beginIndex;
         
-        this.value = null;
-        this.kind = null;
-        this.desiredKind = null;
-        this.base = null;
-        this.wholePart = null;
-        this.decimalPart = null;
+        this.value        = null;
+        this.kind         = null;
+        this.desiredKind  = null;
+        this.base         = null;
+        this.wholePart    = null;
+        this.decimalPart  = null;
         this.exponentType = null;
         this.exponentPart = null;
     }
@@ -142,7 +157,6 @@ public class NumberScanner {
             case INT64   -> new Token.NumberLiteral.Int64(this.beginIndex, numberString, this.value.longValue());
             case FLOAT32 -> new Token.NumberLiteral.Float32(this.beginIndex, numberString, this.value.floatValue());
             case FLOAT64 -> new Token.NumberLiteral.Float64(this.beginIndex, numberString, this.value.doubleValue());
-            default      -> throw new IllegalStateException("Unexpected value: " + this.kind);
         };
     }
     
@@ -215,14 +229,14 @@ public class NumberScanner {
         boolean isIntegral = this.value.stripTrailingZeros().scale() <= 0;
         
         if (this.desiredKind != null) {
-            if (! isIntegral && ! Token.DataTypeKind.isFloatingPoint(this.desiredKind)) {
+            if (! isIntegral && ! TypePrefix.isFloatingPoint(this.desiredKind)) {
                 throw new IllegalArgumentException("Value " + value + " has a fractional result but " + this.desiredKind + " can't hold decimals at " + this.index);
             }
             this.kind = this.desiredKind;
             return;
         }
         
-        this.kind = isIntegral ? Token.DataTypeKind.INT32 : Token.DataTypeKind.FLOAT64;
+        this.kind = isIntegral ? TypePrefix.INT32 : TypePrefix.FLOAT64;
     }
     
     private String consumeDigitRun(CharPredicate isDigit) {
@@ -260,9 +274,9 @@ public class NumberScanner {
     
     private void checkForType() {
         if(! this.hasRun(3)) {return;}
-        Token.DataTypeKind chosenKind = PREFIXES.get(this.text.substring(this.index, this.index + 3));
-        if (chosenKind != null) {
-            this.desiredKind = chosenKind;
+        Optional<TypePrefix> chosenKind = TypePrefix.getByPrefix(this.text.substring(this.index, this.index + 3));
+        if (chosenKind.isPresent()) {
+            this.desiredKind = chosenKind.get();
             this.consume(3);
         }
     }
