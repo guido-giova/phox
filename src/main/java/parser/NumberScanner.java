@@ -229,17 +229,31 @@ public class NumberScanner {
         if (! this.hasCurrent() || isDigit.negate().test(getCurrent())) {
             throw new IllegalArgumentException("Expected digit at " + this.index);
         }
+        if (this.getCurrent() == '_') {
+            throw new IllegalArgumentException("Illegal underscore placement at " + this.index);
+        }
+        
         StringBuilder sb = new StringBuilder();
+        boolean expectNumberAfterUnderscore = false;
         while (this.hasCurrent()) {
             char cc = this.getCurrent();
+            
             if (isDigit.test(cc)) {
+                expectNumberAfterUnderscore = false;
                 sb.append(cc);
                 this.consume();
-            } else if (cc == '_' && this.hasRun(2) && isDigit.test(this.text.charAt(this.index + 1))) {
+            } else if (cc == '_') {
+                expectNumberAfterUnderscore = true;
                 this.consume(); // skip separator; loop consumes the digit right after it
             } else {
+                if (expectNumberAfterUnderscore) {
+                    throw new IllegalArgumentException("Illegal underscore placement at " + this.index);
+                }
                 return sb.toString();
             }
+        }
+        if (expectNumberAfterUnderscore) {
+            throw new IllegalArgumentException("Illegal underscore placement at " + this.index);
         }
         return sb.toString();
     }
