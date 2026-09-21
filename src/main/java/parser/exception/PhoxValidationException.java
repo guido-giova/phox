@@ -26,6 +26,10 @@ public class PhoxValidationException extends PhoxCompilationException {
      * @param at      the index of the error
      */
     public PhoxValidationException(String message, int at) {
-        this(String.format("%s at %d", message, at));
+        this(getIndexedMessage(message, at));
+    }
+    
+    static String getIndexedMessage(String message, int index) {
+        return String.format("%s at %d", message, index);
     }
 }
