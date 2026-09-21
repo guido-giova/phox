@@ -121,8 +121,7 @@ public class NumberScanner {
     private NumberScannerResponse scanNumber() {
         if (this.getCurrent() != '0') {
             this.base = Base.DECIMAL;
-            this.scanNumberBody();
-            return new NumberScannerResponse(this.createNumberliteralToken(), this.index);
+            return this.scanNumberBody();
         }
         this.consume();
         this.checkForType();
@@ -133,8 +132,7 @@ public class NumberScanner {
                 this.index--;
             }
         }
-        this.scanNumberBody();
-        return new NumberScannerResponse(this.createNumberliteralToken(), this.index);
+        return this.scanNumberBody();
     }
     
     private Token createNumberliteralToken() {
@@ -148,7 +146,7 @@ public class NumberScanner {
         };
     }
     
-    private void scanNumberBody() {
+    private NumberScannerResponse scanNumberBody() {
         CharPredicate isDigit = this.getPredicate();
         this.wholePart = this.consumeDigitRun(isDigit);
         
@@ -172,6 +170,7 @@ public class NumberScanner {
         
         this.computeValue();
         this.resolveKind();
+        return new NumberScannerResponse(this.createNumberliteralToken(), this.index);
     }
     
     private CharPredicate getPredicate() {
@@ -261,17 +260,5 @@ public class NumberScanner {
             this.base = chosenBase.get();
             this.consume();
         }
-    }
-    
-    @Override
-    public String toString() {
-        return "NumberScanner{" +
-               "\n    kind=" + kind +
-               "\n    base=" + base +
-               "\n    wholePart='" + wholePart + '\'' +
-               "\n    decimalPart='" + decimalPart + '\'' +
-               "\n    exponentType=" + exponentType +
-               "\n    exponentPart='" + exponentPart + '\'' +
-               "\n}";
     }
 }
