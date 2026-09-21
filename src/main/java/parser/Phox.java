@@ -10,20 +10,31 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * Main class from which to compile Phox files.
+ */
 public final class Phox {
+    /**
+     * The extension that Phox files have
+     */
     public static final String PHOX_EXTENSION = ".phox";
     
     private Phox() {
         throw new UnsupportedOperationException("Don't instantiate Phox");
     }
     
+    /**
+     * Call directly with args from main
+     *
+     * @param path list of paths given through main
+     */
     public static void compile(String[] path) {
         Coordinator.coordinate(
-            Arrays.stream(path)
-                  .map(Path::of)
-                  .map(Phox::compile)
-                  .flatMap(Collection::stream)
-                  .toList()
+                Arrays.stream(path)
+                      .map(Path::of)
+                      .map(Phox::compile)
+                      .flatMap(Collection::stream)
+                      .toList()
         );
     }
     
@@ -46,7 +57,7 @@ public final class Phox {
     
     private static List<FileDefinition> handleDirectory(Path path, String packageName) {
         String newPackageName = Phox.getPackageName(path, packageName);
-        try (java.util.stream.Stream<Path> children = Files.list(path)){
+        try (java.util.stream.Stream<Path> children = Files.list(path)) {
             return children.flatMap(c -> Phox.checkFileType(c, newPackageName).stream())
                            .toList();
         } catch (IOException e) {
