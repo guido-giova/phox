@@ -235,7 +235,7 @@ public class NumberScanner {
             if (isDigit.test(cc)) {
                 sb.append(cc);
                 this.consume();
-            } else if (cc == '_' && this.hasRun(1) && isDigit.test(this.text.charAt(this.index + 1))) {
+            } else if (cc == '_' && this.hasRun(2) && isDigit.test(this.text.charAt(this.index + 1))) {
                 this.consume(); // skip separator; loop consumes the digit right after it
             } else {
                 return sb.toString();
