@@ -3,6 +3,9 @@ package parser;
 import utils.CharPredicate;
 import utils.Chars;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 
@@ -19,6 +22,12 @@ public class NumberScanner {
             this.base   = base;
             this.symbol = symbol;
         }
+        
+        public static Optional<Base> getBySymbol(char symbol) {
+            return Arrays.stream(Base.values())
+                         .filter(b -> b.symbol == symbol)
+                         .findFirst();
+        }
     }
     
     private enum Exponent {
@@ -30,6 +39,12 @@ public class NumberScanner {
         Exponent(int base, char symbol) {
             this.base   = base;
             this.symbol = symbol;
+        }
+        
+        public static Optional<Exponent> getBySymbol(char symbol) {
+            return Arrays.stream(Exponent.values())
+                         .filter(e -> e.symbol == symbol)
+                         .findFirst();
         }
     }
     
@@ -46,7 +61,10 @@ public class NumberScanner {
     private final int length;
     private final int beginIndex;
     private int index;
+    
+    private BigDecimal value;
     private Token.DataTypeKind kind;
+    private Token.DataTypeKind desiredKind;
     private Base base;
     private String wholePart;
     private String decimalPart;
@@ -59,7 +77,9 @@ public class NumberScanner {
         this.beginIndex = beginIndex;
         this.index      = beginIndex;
         
+        this.value = null;
         this.kind = null;
+        this.desiredKind = null;
         this.base = null;
         this.wholePart = null;
         this.decimalPart = null;
@@ -72,16 +92,22 @@ public class NumberScanner {
     private boolean isCurrentPeriod() {return this.getCurrent() == '.';}
     
     private Optional<Exponent> isCurrentExponent() {
-        return java.util.Arrays.stream(Exponent.values())
-                        .filter(e -> e.symbol == this.getCurrent())
-                        .findFirst();
+        return Exponent.getBySymbol(this.getCurrent());
     }
     
     private boolean hasNext() {return this.hasNext(1);}
     
     private boolean hasNext(int count) {return this.index + count < this.length;}
     
+    private int consume(int n) {
+        int lastIndex = this.index;
+        this.index += n;
+        return lastIndex;
+    }
     
+    private int consume() {
+        return this.consume(1);
+    }
     
     static NumberScannerResponse scanNumber(String text, int beginIndex) {
         return new NumberScanner(text, beginIndex).scanNumber();
@@ -92,41 +118,92 @@ public class NumberScanner {
             this.scanDecimalNumber();
             return new NumberScannerResponse(this.createNumberliteralToken(), this.index);
         }
-        
+        this.consume();
+        this.checkForType();
+        this.checkForBase();
+        if (this.base == null) {
+            this.base = Base.DECIMAL;
+            if (this.desiredKind == null) {
+                this.index--;
+            }
+            this.scanDecimalNumber();
+            return new NumberScannerResponse(this.createNumberliteralToken(), this.index);
+        }
         
         
         return null;
     }
     
     private Token createNumberliteralToken() {
-        System.out.println(this);
-        return new Token.NumberLiteral.Float64(this.beginIndex, "0.0d", 0.0d);
+        final String numberString = this.text.substring(this.beginIndex, this.index);
+        return switch (this.kind) {
+            case INT32   -> new Token.NumberLiteral.Int32(this.beginIndex, numberString, this.value.intValue());
+            case INT64   -> new Token.NumberLiteral.Int64(this.beginIndex, numberString, this.value.longValue());
+            case FLOAT32 -> new Token.NumberLiteral.Float32(this.beginIndex, numberString, this.value.floatValue());
+            case FLOAT64 -> new Token.NumberLiteral.Float64(this.beginIndex, numberString, this.value.doubleValue());
+            default      -> throw new IllegalStateException("Unexpected value: " + this.kind);
+        };
     }
     
     private void scanDecimalNumber() {
-        this.base = Base.DECIMAL;
-        this.kind = Token.DataTypeKind.INT32;
-        
         this.wholePart = this.consumeDigitRun(Chars::isDecDigit);
         
-        boolean hasPeriod = this.isCurrentPeriod();
-        if (hasPeriod) {
-            this.index++;
-            this.kind = Token.DataTypeKind.FLOAT64;
+        if (this.isCurrentPeriod()) {
+            this.consume();
             this.decimalPart = this.consumeDigitRun(Chars::isDecDigit);
         }
         
         Optional<Exponent> hasExponent = this.isCurrentExponent();
         if (hasExponent.isPresent()) {
-            this.index++;
+            this.consume();
             this.exponentType = hasExponent.get();
-            String exponentPart = "";
+            
+            String sign = "";
             if (Chars.isSignSymbol(this.getCurrent())) {
-                exponentPart = Character.toString(this.getCurrent());
-                this.index++;
+                sign = Character.toString(this.getCurrent());
+                this.consume();
             }
-            this.exponentPart = exponentPart + this.consumeDigitRun(Chars::isDecDigit);
+            this.exponentPart = sign + this.consumeDigitRun(Chars::isDecDigit);
         }
+        
+        this.base = Base.DECIMAL;
+        this.computeValue();
+        this.resolveKind();
+    }
+    
+    private void computeValue() {
+        String digits = this.wholePart;
+        if (this.decimalPart != null) {
+            digits += '.' + this.decimalPart;
+        }
+        BigDecimal tempValue = new BigDecimal(digits);
+        
+        if (this.exponentPart == null) {
+            this.value = tempValue;
+            return;
+        }
+        int exp = Integer.parseInt(this.exponentPart);
+        BigDecimal expBase = BigDecimal.valueOf(this.exponentType.base);
+        
+        if (exp >= 0) {
+            this.value = tempValue.multiply(expBase.pow(exp));
+        } else {
+            this.value = tempValue.divide(expBase.pow(-exp), MathContext.UNLIMITED);
+        }
+    }
+    
+    private void resolveKind() {
+        boolean isIntegral = this.value.stripTrailingZeros().scale() <= 0;
+        
+        if (this.desiredKind != null) {
+            if (! isIntegral && ! Token.DataTypeKind.isFloatingPoint(this.desiredKind)) {
+                throw new IllegalArgumentException("Value " + value + " has a fractional result but " + this.desiredKind + " can't hold decimals at " + this.index);
+            }
+            this.kind = this.desiredKind;
+            return;
+        }
+        
+        this.kind = isIntegral ? Token.DataTypeKind.INT32 : Token.DataTypeKind.FLOAT64;
     }
     
     private String consumeDigitRun(CharPredicate isDigit) {
@@ -138,14 +215,32 @@ public class NumberScanner {
             char cc = this.getCurrent();
             if (isDigit.test(cc)) {
                 sb.append(cc);
-                this.index++;
+                this.consume();
             } else if (cc == '_' && this.hasNext(1) && isDigit.test(this.text.charAt(this.index + 1))) {
-                this.index++; // skip separator; loop consumes the digit right after it
+                this.consume(); // skip separator; loop consumes the digit right after it
             } else {
                 return sb.toString();
             }
         }
         return "It stopped lol";
+    }
+    
+    private void checkForType() {
+        if(! this.hasNext(3)) {return;}
+        Token.DataTypeKind chosenKind = PREFIXES.get(this.text.substring(this.index, this.index + 3));
+        if (chosenKind != null) {
+            this.desiredKind = chosenKind;
+            this.consume(3);
+        }
+    }
+    
+    private void checkForBase() {
+        if (! this.hasNext()) {return;}
+        Optional<Base> chosenBase = Base.getBySymbol(this.getCurrent());
+        if (chosenBase.isPresent()) {
+            this.base = chosenBase.get();
+            this.consume();
+        }
     }
     
     @Override

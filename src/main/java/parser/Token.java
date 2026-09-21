@@ -260,6 +260,14 @@ public sealed interface Token {
         final String text;
         DataTypeKind(String text) {this.text = text;}
         @Override public String text() {return this.text;}
+        
+        public static boolean isFloatingPoint(DataTypeKind kind) {
+            return kind == FLOAT32 || kind == FLOAT64;
+        }
+        
+        public static boolean isInteger(DataTypeKind kind) {
+            return kind == INT32 || kind == INT64;
+        }
     }
     
     /**
