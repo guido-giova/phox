@@ -4,6 +4,7 @@ import utils.CharPredicate;
 import utils.Chars;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.MathContext;
 import java.util.Arrays;
 import java.util.Map;
@@ -89,15 +90,19 @@ public class NumberScanner {
     
     private char getCurrent() {return this.text.charAt(this.index);}
     
-    private boolean isCurrentPeriod() {return this.getCurrent() == '.';}
+    private boolean isCurrentPeriod() {
+        if (! this.hasCurrent()) { return false; }
+        return this.getCurrent() == '.';
+    }
     
     private Optional<Exponent> isCurrentExponent() {
+        if (! this.hasCurrent()) { return Optional.empty(); }
         return Exponent.getBySymbol(this.getCurrent());
     }
     
     private boolean hasCurrent() {return this.index < this.length;}
     
-    private boolean hasAhead(int count) {return this.index + count < this.length;}
+    private boolean hasRun(int count) {return this.index + count <= this.length;}
     
     private int consume(int n) {
         int lastIndex = this.index;
@@ -115,7 +120,8 @@ public class NumberScanner {
     
     private NumberScannerResponse scanNumber() {
         if (this.getCurrent() != '0') {
-            this.scanDecimalNumber();
+            this.base = Base.DECIMAL;
+            this.scanNumberBody();
             return new NumberScannerResponse(this.createNumberliteralToken(), this.index);
         }
         this.consume();
@@ -126,12 +132,9 @@ public class NumberScanner {
             if (this.desiredKind == null) {
                 this.index--;
             }
-            this.scanDecimalNumber();
-            return new NumberScannerResponse(this.createNumberliteralToken(), this.index);
         }
-        
-        
-        return null;
+        this.scanNumberBody();
+        return new NumberScannerResponse(this.createNumberliteralToken(), this.index);
     }
     
     private Token createNumberliteralToken() {
@@ -145,12 +148,13 @@ public class NumberScanner {
         };
     }
     
-    private void scanDecimalNumber() {
-        this.wholePart = this.consumeDigitRun(Chars::isDecDigit);
+    private void scanNumberBody() {
+        CharPredicate isDigit = this.getPredicate();
+        this.wholePart = this.consumeDigitRun(isDigit);
         
         if (this.isCurrentPeriod()) {
             this.consume();
-            this.decimalPart = this.consumeDigitRun(Chars::isDecDigit);
+            this.decimalPart = this.consumeDigitRun(isDigit);
         }
         
         Optional<Exponent> hasExponent = this.isCurrentExponent();
@@ -166,22 +170,38 @@ public class NumberScanner {
             this.exponentPart = sign + this.consumeDigitRun(Chars::isDecDigit);
         }
         
-        this.base = Base.DECIMAL;
         this.computeValue();
         this.resolveKind();
     }
     
+    private CharPredicate getPredicate() {
+        return switch (this.base) {
+            case HEXADECIMAL -> Chars::isHexDigit;
+            case DECIMAL -> Chars::isDecDigit;
+            case OCTAL -> Chars::isOctDigit;
+            case BINARY -> Chars::isBinDigit;
+        };
+    }
+    
     private void computeValue() {
-        String digits = this.wholePart;
+        int radix = this.base.base;
+        
+        BigInteger wholeInt = new BigInteger(this.wholePart, radix);
+        BigDecimal tempValue = new BigDecimal(wholeInt);
+        
         if (this.decimalPart != null) {
-            digits += '.' + this.decimalPart;
+            BigInteger decimalInt = new BigInteger(this.decimalPart, radix);
+            BigDecimal scale = BigDecimal.valueOf(radix).pow(this.decimalPart.length());
+            
+            BigDecimal fractional = new BigDecimal(decimalInt).divide(scale, MathContext.UNLIMITED);
+            tempValue = tempValue.add(fractional);
         }
-        BigDecimal tempValue = new BigDecimal(digits);
         
         if (this.exponentPart == null) {
             this.value = tempValue;
             return;
         }
+        
         int exp = Integer.parseInt(this.exponentPart);
         BigDecimal expBase = BigDecimal.valueOf(this.exponentType.base);
         
@@ -216,17 +236,17 @@ public class NumberScanner {
             if (isDigit.test(cc)) {
                 sb.append(cc);
                 this.consume();
-            } else if (cc == '_' && this.hasAhead(1) && isDigit.test(this.text.charAt(this.index + 1))) {
+            } else if (cc == '_' && this.hasRun(1) && isDigit.test(this.text.charAt(this.index + 1))) {
                 this.consume(); // skip separator; loop consumes the digit right after it
             } else {
                 return sb.toString();
             }
         }
-        return "It stopped lol";
+        return sb.toString();
     }
     
     private void checkForType() {
-        if(! this.hasAhead(3)) {return;}
+        if(! this.hasRun(3)) {return;}
         Token.DataTypeKind chosenKind = PREFIXES.get(this.text.substring(this.index, this.index + 3));
         if (chosenKind != null) {
             this.desiredKind = chosenKind;
