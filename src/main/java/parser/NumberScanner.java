@@ -95,9 +95,9 @@ public class NumberScanner {
         return Exponent.getBySymbol(this.getCurrent());
     }
     
-    private boolean hasNext() {return this.hasNext(1);}
+    private boolean hasCurrent() {return this.index < this.length;}
     
-    private boolean hasNext(int count) {return this.index + count < this.length;}
+    private boolean hasAhead(int count) {return this.index + count < this.length;}
     
     private int consume(int n) {
         int lastIndex = this.index;
@@ -207,16 +207,16 @@ public class NumberScanner {
     }
     
     private String consumeDigitRun(CharPredicate isDigit) {
-        if (! this.hasNext() || isDigit.negate().test(getCurrent())) {
+        if (! this.hasCurrent() || isDigit.negate().test(getCurrent())) {
             throw new IllegalArgumentException("Expected digit at " + this.index);
         }
         StringBuilder sb = new StringBuilder();
-        while (this.hasNext()) {
+        while (this.hasCurrent()) {
             char cc = this.getCurrent();
             if (isDigit.test(cc)) {
                 sb.append(cc);
                 this.consume();
-            } else if (cc == '_' && this.hasNext(1) && isDigit.test(this.text.charAt(this.index + 1))) {
+            } else if (cc == '_' && this.hasAhead(1) && isDigit.test(this.text.charAt(this.index + 1))) {
                 this.consume(); // skip separator; loop consumes the digit right after it
             } else {
                 return sb.toString();
@@ -226,7 +226,7 @@ public class NumberScanner {
     }
     
     private void checkForType() {
-        if(! this.hasNext(3)) {return;}
+        if(! this.hasAhead(3)) {return;}
         Token.DataTypeKind chosenKind = PREFIXES.get(this.text.substring(this.index, this.index + 3));
         if (chosenKind != null) {
             this.desiredKind = chosenKind;
@@ -235,7 +235,7 @@ public class NumberScanner {
     }
     
     private void checkForBase() {
-        if (! this.hasNext()) {return;}
+        if (! this.hasCurrent()) {return;}
         Optional<Base> chosenBase = Base.getBySymbol(this.getCurrent());
         if (chosenBase.isPresent()) {
             this.base = chosenBase.get();
