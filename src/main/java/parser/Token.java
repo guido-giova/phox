@@ -1,5 +1,6 @@
 package parser;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -62,7 +63,7 @@ public sealed interface Token {
          * @param raw   The raw data of the number literal
          * @param value The value itself
          */
-        record Int32(int start, String raw, int value) implements NumberLiteral {}
+        record Int32(int start, String raw, BigDecimal value) implements NumberLiteral {}
         
         /**
          * Represents a 64-bit integer.
@@ -71,7 +72,7 @@ public sealed interface Token {
          * @param raw   The raw data of the number literal
          * @param value The value itself
          */
-        record Int64(int start, String raw, long value) implements NumberLiteral {}
+        record Int64(int start, String raw, BigDecimal value) implements NumberLiteral {}
         
         /**
          * Represents a 32-bit float.
@@ -80,7 +81,7 @@ public sealed interface Token {
          * @param raw   The raw data of the number literal
          * @param value The value itself
          */
-        record Float32(int start, String raw, float value) implements NumberLiteral {}
+        record Float32(int start, String raw, BigDecimal value) implements NumberLiteral {}
         
         /**
          * Represents a 64-bit float.
@@ -89,7 +90,7 @@ public sealed interface Token {
          * @param raw   The raw data of the number literal
          * @param value The value itself
          */
-        record Float64(int start, String raw, double value) implements NumberLiteral {}
+        record Float64(int start, String raw, BigDecimal value) implements NumberLiteral {}
     }
     
     /**

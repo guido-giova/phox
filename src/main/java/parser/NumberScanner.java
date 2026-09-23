@@ -153,10 +153,10 @@ public class NumberScanner {
     private Token createNumberliteralToken() {
         final String numberString = this.text.substring(this.beginIndex, this.index);
         return switch (this.kind) {
-            case INT32   -> new Token.NumberLiteral.Int32(this.beginIndex, numberString, this.value.intValue());
-            case INT64   -> new Token.NumberLiteral.Int64(this.beginIndex, numberString, this.value.longValue());
-            case FLOAT32 -> new Token.NumberLiteral.Float32(this.beginIndex, numberString, this.value.floatValue());
-            case FLOAT64 -> new Token.NumberLiteral.Float64(this.beginIndex, numberString, this.value.doubleValue());
+            case INT32   -> new Token.NumberLiteral.Int32(this.beginIndex, numberString, this.value);
+            case INT64   -> new Token.NumberLiteral.Int64(this.beginIndex, numberString, this.value);
+            case FLOAT32 -> new Token.NumberLiteral.Float32(this.beginIndex, numberString, this.value);
+            case FLOAT64 -> new Token.NumberLiteral.Float64(this.beginIndex, numberString, this.value);
         };
     }
     
