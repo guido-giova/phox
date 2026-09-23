@@ -2,6 +2,7 @@ package parser;
 
 import parser.exception.PhoxFileNotFoundException;
 import parser.exception.PhoxIOException;
+import parser.utils.StringUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -46,7 +47,7 @@ public final class Phox {
     }
     
     private static List<FileDefinition> checkFileType(Path path, String packageName) {
-        if (Files.isRegularFile(path) && path.getFileName().toString().endsWith(PHOX_EXTENSION)) {
+        if (Files.isRegularFile(path) && StringUtils.endsWithIgnoreCase(path.getFileName().toString(), PHOX_EXTENSION)) {
             return List.of(Phox.handleFile(path, packageName));
         }
         if (Files.isDirectory(path)) {
