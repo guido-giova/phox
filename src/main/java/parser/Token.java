@@ -262,10 +262,22 @@ public sealed interface Token {
         DataTypeKind(String text) {this.text = text;}
         @Override public String text() {return this.text;}
         
+        /**
+         * Informs if the given DataTypeKind represents a floating point number primitive.
+         *
+         * @param kind that wants to be checked
+         * @return {@code true} if it is a floating point number, {@code false} otherwise.
+         */
         public static boolean isFloatingPoint(DataTypeKind kind) {
             return kind == FLOAT32 || kind == FLOAT64;
         }
         
+        /**
+         * Informs if the given DataTypeKind represents an integer number primitive.
+         *
+         * @param kind that wants to be checked
+         * @return {@code true} if it is an integer number, {@code false} otherwise.
+         */
         public static boolean isInteger(DataTypeKind kind) {
             return kind == INT32 || kind == INT64;
         }
