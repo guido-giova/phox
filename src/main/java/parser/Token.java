@@ -250,10 +250,18 @@ public sealed interface Token {
          */
         String text();
         
+        /**
+         * Returns an Optional with the KeywordKind if found by given text.
+         *
+         * @param type of the enum string that is being searched
+         * @param text that is being searched
+         * @param <T>  type that is returned inside the Optional
+         * @return An Optional containing the enum's value if found, empty otherwise.
+         */
         static <T extends Enum<T> & KeywordKind> Optional<T> getByText(Class<T> type, String text) {
             return java.util.Arrays.stream(type.getEnumConstants())
-                    .filter(e -> e.text().equals(text))
-                    .findFirst();
+                                   .filter(e -> e.text().equals(text))
+                                   .findFirst();
         }
     }
     
