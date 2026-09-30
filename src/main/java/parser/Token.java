@@ -306,6 +306,12 @@ public sealed interface Token {
                     this.prefix = text.charAt(0) + text.substring(text.length() - 2);
                 }
                 @Override public String text() {return this.text;}
+                
+                /**
+                 * The prefix of the given number data type, written as the first letter and the size, for example: 'float32' -> 'f32'
+                 *
+                 * @return the prefix for the given number data type
+                 */
                 public String prefix() {return this.prefix;}
                 
                 /**
