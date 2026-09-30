@@ -91,6 +91,8 @@ public sealed interface Token {
          * @param value The value itself
          */
         record Float64(int start, String raw, BigDecimal value) implements NumberLiteral {}
+        
+        record Unresolved(int start, String raw, int magnitude, DataTypeKind.NumberDataKind kind) implements NumberLiteral {}
     }
     
     /**
