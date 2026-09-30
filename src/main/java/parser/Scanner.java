@@ -124,18 +124,18 @@ public final class Scanner extends TextScanner {
         char next = this.charAt(this.index + 1);
         char escaped;
         switch (next) {
-            case 'n'  -> { this.index += 2; escaped = '\n'; }
-            case 't'  -> { this.index += 2; escaped = '\t'; }
-            case 'r'  -> { this.index += 2; escaped = '\r'; }
-            case '\\' -> { this.index += 2; escaped = '\\'; }
-            case '"'  -> { this.index += 2; escaped = '\"'; }
-            case '\'' -> { this.index += 2; escaped = '\''; }
+            case 'n'  -> { this.consume(2); escaped = '\n'; }
+            case 't'  -> { this.consume(2); escaped = '\t'; }
+            case 'r'  -> { this.consume(2); escaped = '\r'; }
+            case '\\' -> { this.consume(2); escaped = '\\'; }
+            case '"'  -> { this.consume(2); escaped = '\"'; }
+            case '\'' -> { this.consume(2); escaped = '\''; }
             case 'u'  -> {
                 if (! this.hasRun(6)) {
                     throw new IllegalArgumentException("Invalid Unicode escape at " + this.index);
                 }
                 String hex = this.substring(this.index + 2, this.index + 6);
-                this.index += 6;
+                this.consume(6);
                 escaped = (char) Integer.parseInt(hex, 16);
             }
             default -> throw new IllegalArgumentException("Unknown escape '\\" + next + "' at " + this.index);
