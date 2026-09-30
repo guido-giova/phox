@@ -241,6 +241,12 @@ public sealed interface Token {
          * @return the string it reserves
          */
         String text();
+        
+        static <T extends Enum<T> & KeywordKind> Optional<T> getByText(Class<T> type, String text) {
+            return java.util.Arrays.stream(type.getEnumConstants())
+                    .filter(e -> e.text().equals(text))
+                    .findFirst();
+        }
     }
     
     /**
