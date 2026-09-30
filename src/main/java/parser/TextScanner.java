@@ -33,4 +33,25 @@ public abstract class TextScanner {
     protected String getCurrentAsString() {
         return Character.toString(this.getCurrent());
     }
+    
+    /**
+     * Skips forward by the given amount and returns the old index.
+     *
+     * @param n Amount of indices skipped.
+     * @return  The old index.
+     */
+    protected int consume(int n) {
+        int lastIndex = this.index;
+        this.index += n;
+        return lastIndex;
+    }
+    
+    /**
+     * Skips forward by the one and returns the old index.
+     *
+     * @return The old index.
+     */
+    protected int consume() {
+        return this.consume(1);
+    }
 }
