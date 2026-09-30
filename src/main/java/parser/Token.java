@@ -191,7 +191,7 @@ public sealed interface Token {
         BRACKET_CLOSE(')'),
         /** Opening bracket symbol: {@code (} */
         BRACKET_OPEN('('),
-        /** Caret symbol: {@code ^}*/
+        /** Caret symbol: {@code ^} */
         CARET('^'),
         /** Comma symbol: {@code ,} */
         COMMA(','),
