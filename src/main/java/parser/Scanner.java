@@ -23,7 +23,7 @@ public final class Scanner extends TextScanner {
         List<Token> tokens = new java.util.ArrayList<>();
         int lastIndex = 0;
         
-        while (this.index < this.length) {
+        while (this.hasCurrent()) {
             char cc = this.getCurrent();
             
             if (cc == '\"') {
@@ -66,7 +66,7 @@ public final class Scanner extends TextScanner {
         StringBuilder sb = new StringBuilder();
         final int start = this.consume(); // skip opening quote
         
-        while (this.index < this.length) {
+        while (this.hasCurrent()) {
             char cur = this.getCurrent();
             
             if (cur == '\\') {
