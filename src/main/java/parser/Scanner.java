@@ -24,7 +24,7 @@ public final class Scanner extends TextScanner {
         int lastIndex = 0;
         
         while (this.index < this.length) {
-            char cc = this.text.charAt(this.index);
+            char cc = this.getCurrent();
             
             if (cc == '\"') {
                 this.tokenizeAndAddToList(tokens, lastIndex, this.index);
@@ -67,7 +67,7 @@ public final class Scanner extends TextScanner {
         final int start = this.consume(); // skip opening quote
         
         while (this.index < this.length) {
-            char cur = this.text.charAt(this.index);
+            char cur = this.getCurrent();
             
             if (cur == '\\') {
                 sb.append(this.scanEscapedCharacter());
@@ -93,7 +93,7 @@ public final class Scanner extends TextScanner {
             throw new IllegalArgumentException("Character literal never closed at " + this.index);
         }
         
-        char cc = text.charAt(this.index);
+        char cc = this.getCurrent();
         if (cc == '\'') {
             throw new IllegalArgumentException("Empty character literal at " + this.index);
         }
@@ -108,7 +108,7 @@ public final class Scanner extends TextScanner {
             throw new IllegalArgumentException("Character literal never closed at " + this.index);
         }
         
-        char next = text.charAt(this.index);
+        char next = this.getCurrent();
         if (next != '\'') {
             throw new IllegalArgumentException("Too many characters in character literal at " + this.index);
         }
@@ -148,11 +148,11 @@ public final class Scanner extends TextScanner {
         final int start = this.consume(2); // skip opening "/*"
         
         while (this.index < this.length - 1) {
-            if (this.text.charAt(this.index) == '*' && text.charAt(this.index + 1) == '/') {
+            if (this.getCurrent() == '*' && text.charAt(this.index + 1) == '/') {
                 this.consume(2);
                 return new Token.Comment(start, sb.toString());
             }
-            sb.append(this.text.charAt(this.index));
+            sb.append(this.getCurrent());
             this.consume();
         }
         
