@@ -9,7 +9,7 @@ import java.math.MathContext;
 import java.util.Arrays;
 import java.util.Optional;
 
-public class NumberScanner {
+public final class NumberScanner extends TextScanner {
     private enum Base {
         HEXADECIMAL(16, 'x'),
         DECIMAL(10, 'd'),
@@ -50,11 +50,6 @@ public class NumberScanner {
     
     record NumberScannerResponse(Token.NumberLiteral.Unresolved token, int endIndex) {}
     
-    private final String text;
-    private final int length;
-    private final int beginIndex;
-    private int index;
-    
     private BigDecimal value;
     private Token.DataTypeKind.Number kind;
     private Token.DataTypeKind.Number desiredKind;
@@ -65,10 +60,7 @@ public class NumberScanner {
     private String exponentPart;
     
     private NumberScanner(String text, int beginIndex) {
-        this.text       = text;
-        this.length     = text.length();
-        this.beginIndex = beginIndex;
-        this.index      = beginIndex;
+        super(text, beginIndex);
         
         this.value        = null;
         this.kind         = null;
@@ -80,8 +72,6 @@ public class NumberScanner {
         this.exponentPart = null;
     }
     
-    private char getCurrent() {return this.text.charAt(this.index);}
-    
     private boolean isCurrentPeriod() {
         if (! this.hasCurrent()) { return false; }
         return this.getCurrent() == '.';
@@ -91,8 +81,6 @@ public class NumberScanner {
         if (! this.hasCurrent()) { return Optional.empty(); }
         return Exponent.getBySymbol(this.getCurrent());
     }
-    
-    private boolean hasCurrent() {return this.index < this.length;}
     
     private boolean hasRun(int count) {return this.index + count <= this.length;}
     
