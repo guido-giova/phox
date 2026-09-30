@@ -27,4 +27,10 @@ public abstract class TextScanner {
         return this.text.charAt(this.index);
     }
     
+    /**
+     * @return the current character as a String.
+     */
+    protected String getCurrentAsString() {
+        return Character.toString(this.getCurrent());
+    }
 }
