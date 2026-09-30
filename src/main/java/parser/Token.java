@@ -101,7 +101,7 @@ public sealed interface Token {
          * @param value The value itself
          * @param kind  The kind to be mapped to
          */
-        record Unresolved(int start, String raw, BigDecimal value, DataTypeKind.Number kind) implements NumberLiteral {}
+        record Unresolved(int start, String raw, BigDecimal value, KeywordKind.Data.Number kind) implements NumberLiteral {}
     }
     
     /**
@@ -241,11 +241,11 @@ public sealed interface Token {
      */
     sealed interface KeywordKind
              permits /* enums */
-                     FlowTypeKind,
+                     KeywordKind.Flow,
                      /* interfaces */
-                     DataTypeKind,
-                     TypeTypeKind,
-                     ModifierTypeKind {
+                     KeywordKind.Data,
+                     KeywordKind.Type,
+                     KeywordKind.Modifier {
         /**
          * @return the string it reserves
          */
@@ -264,282 +264,282 @@ public sealed interface Token {
                          .filter(e -> e.text().equals(text))
                          .findFirst();
         }
-    }
-    
-    /**
-     * Represents the primitives and other data types.
-     */
-    sealed interface DataTypeKind
-             extends KeywordKind
-             permits DataTypeKind.Number,
-                     DataTypeKind.Other {
-        /**
-         * Represents data types that are not numbers
-         */
-        enum Other implements DataTypeKind {
-            /** void primitive */
-            VOID("void"),
-            /** bool primitive */
-            BOOL("bool"),
-            ;
-            final String text;
-            Other(String text) {this.text = text;}
-            @Override public String text() {return this.text;}
-        }
         
         /**
-         * Represents data kinds that represents numbers
+         * Represents the primitives and other data types.
          */
-        enum Number implements DataTypeKind {
-            /** int32 primitive */
-            INT32("int32"),
-            /** int64 primitive */
-            INT64("int64"),
-            /** float32 primitive */
-            FLOAT32("float32"),
-            /** float64 primitive */
-            FLOAT64("float64")
-            ;
-            final String text;
-            final String prefix;
-            Number(String text) {
-                this.text   = text;
-                this.prefix = text.charAt(0) + text.substring(text.length() - 2);
-            }
-            @Override public String text() {return this.text;}
-            public String prefix() {return this.prefix;}
-            
+        sealed interface Data
+                 extends KeywordKind
+                 permits Data.Number,
+                         Data.Other {
             /**
-             * Informs if the given DataTypeKind represents a floating point number primitive.
-             *
-             * @param kind that wants to be checked
-             * @return {@code true} if it is a floating point number, {@code false} otherwise.
+             * Represents data types that are not numbers
              */
-            public static boolean isFloatingPoint(DataTypeKind kind) {
-                return kind == FLOAT32 || kind == FLOAT64;
+            enum Other implements Data {
+                /** void primitive */
+                VOID("void"),
+                /** bool primitive */
+                BOOL("bool"),
+                ;
+                final String text;
+                Other(String text) {this.text = text;}
+                @Override public String text() {return this.text;}
             }
             
             /**
-             * Informs if the given DataTypeKind represents an integer number primitive.
-             *
-             * @param kind that wants to be checked
-             * @return {@code true} if it is an integer number, {@code false} otherwise.
+             * Represents data kinds that represents numbers
              */
-            public static boolean isInteger(DataTypeKind kind) {
-                return kind == INT32 || kind == INT64;
+            enum Number implements Data {
+                /** int32 primitive */
+                INT32("int32"),
+                /** int64 primitive */
+                INT64("int64"),
+                /** float32 primitive */
+                FLOAT32("float32"),
+                /** float64 primitive */
+                FLOAT64("float64")
+                ;
+                final String text;
+                final String prefix;
+                Number(String text) {
+                    this.text   = text;
+                    this.prefix = text.charAt(0) + text.substring(text.length() - 2);
+                }
+                @Override public String text() {return this.text;}
+                public String prefix() {return this.prefix;}
+                
+                /**
+                 * Informs if the given Data represents a floating point number primitive.
+                 *
+                 * @param kind that wants to be checked
+                 * @return {@code true} if it is a floating point number, {@code false} otherwise.
+                 */
+                public static boolean isFloatingPoint(Data kind) {
+                    return kind == FLOAT32 || kind == FLOAT64;
+                }
+                
+                /**
+                 * Informs if the given Data represents an integer number primitive.
+                 *
+                 * @param kind that wants to be checked
+                 * @return {@code true} if it is an integer number, {@code false} otherwise.
+                 */
+                public static boolean isInteger(Data kind) {
+                    return kind == INT32 || kind == INT64;
+                }
+                
+                /**
+                 * Returns an Optional with the Number if found by given prefix.
+                 *
+                 * @param prefix that is being searched
+                 * @return An Optional containing the Number's value if found, empty otherwise.
+                 */
+                static Optional<Number> getByPrefix(String prefix) {
+                    return Arrays.stream(Number.values())
+                                 .filter(e -> e.prefix.equals(prefix))
+                                 .findAny();
+                }
+            }
+        }
+        
+        /**
+         * Represents the keywords that define code flow
+         */
+        enum Flow implements KeywordKind {
+            /** Indicates the {@code return} keyword*/
+            RETURN("return"),
+            /** Indicates the {@code if} keyword*/
+            IF("if"),
+            /** Indicates the {@code else} keyword*/
+            ELSE("else"),
+            /** Indicates the {@code for} keyword*/
+            FOR("for"),
+            /** Indicates the {@code while} keyword*/
+            WHILE("while"),
+            /** Indicates the {@code switch} keyword*/
+            SWITCH("switch")
+            ;
+            final String text;
+            Flow(String text) {this.text = text;}
+            @Override public String text() {return this.text;}
+        }
+        
+        /**
+         * Represents the keywords for class and structure definition
+         */
+        sealed interface Type
+                 extends KeywordKind
+                 permits Type.Creation,
+                         Type.Listing,
+                         Type.Syntax,
+                         Type.Variable {
+            /**
+             * Represents type creation keywords.
+             */
+            enum Creation implements Type {
+                /** Indicates the {@code class} keyword*/
+                CLASS("class"),
+                /** Indicates the {@code structure} keyword*/
+                STRUCTURE("structure"),
+                /** Indicates the {@code enum} keyword*/
+                ENUM("enum"),
+                /** Indicates the {@code data} keyword*/
+                DATA("data"),
+                /** Indicates the {@code single} keyword*/
+                SINGLE("single");
+                final String text;
+                Creation(String text) {this.text = text;}
+                @Override public String text() {return this.text;}
             }
             
             /**
-             * Returns an Optional with the Number if found by given prefix.
-             *
-             * @param prefix that is being searched
-             * @return An Optional containing the Number's value if found, empty otherwise.
+             * Represents modifications of a type.
              */
-            static Optional<Number> getByPrefix(String prefix) {
-                return java.util.Arrays.stream(Number.values())
-                                       .filter(e -> e.prefix.equals(prefix))
-                                       .findAny();
+            enum Listing implements Type {
+                /** Indicates the {@code extends} keyword*/
+                EXTENDS("extends"),
+                /** Indicates the {@code permits} keyword*/
+                PERMITS("permits"),
+                ;
+                final String text;
+                Listing(String text) {this.text = text;}
+                @Override public String text() {return this.text;}
+            }
+            
+            /**
+             * Represents the token syntax.
+             */
+            enum Syntax implements Type {
+                /** Indicates the {@code syntax} keyword*/
+                SYNTAX("syntax")
+                ;
+                final String text;
+                Syntax(String text) {this.text = text;}
+                @Override public String text() {return this.text;}
+            }
+            
+            /**
+             * Represents the token that refer to the types.
+             */
+            enum Variable implements Type {
+                /** Indicates the {@code this} keyword*/
+                THIS("this"),
+                /** Indicates the {@code child} keyword*/
+                CHILD("child"),
+                /** Indicates the {@code super} keyword*/
+                SUPER("super")
+                ;
+                final String text;
+                Variable(String text) {this.text = text;}
+                @Override public String text() {return this.text;}
             }
         }
-    }
-    
-    /**
-     * Represents the keywords that define code flow
-     */
-    enum FlowTypeKind implements KeywordKind {
-        /** Indicates the {@code return} keyword*/
-        RETURN("return"),
-        /** Indicates the {@code if} keyword*/
-        IF("if"),
-        /** Indicates the {@code else} keyword*/
-        ELSE("else"),
-        /** Indicates the {@code for} keyword*/
-        FOR("for"),
-        /** Indicates the {@code while} keyword*/
-        WHILE("while"),
-        /** Indicates the {@code switch} keyword*/
-        SWITCH("switch")
-        ;
-        final String text;
-        FlowTypeKind(String text) {this.text = text;}
-        @Override public String text() {return this.text;}
-    }
-    
-    /**
-     * Represents the keywords for class and structure definition
-     */
-    sealed interface TypeTypeKind
-             extends KeywordKind
-             permits TypeTypeKind.Creation,
-                     TypeTypeKind.Listing,
-                     TypeTypeKind.Syntax,
-                     TypeTypeKind.Variable {
-        /**
-         * Represents type creation keywords.
-         */
-        enum Creation implements TypeTypeKind {
-            /** Indicates the {@code class} keyword*/
-            CLASS("class"),
-            /** Indicates the {@code structure} keyword*/
-            STRUCTURE("structure"),
-            /** Indicates the {@code enum} keyword*/
-            ENUM("enum"),
-            /** Indicates the {@code data} keyword*/
-            DATA("data"),
-            /** Indicates the {@code single} keyword*/
-            SINGLE("single");
-            final String text;
-            Creation(String text) {this.text = text;}
-            @Override public String text() {return this.text;}
-        }
         
         /**
-         * Represents modifications of a type.
+         * Represents the keywords that define the modifiers of methods, classes, structures, variables, etc.
          */
-        enum Listing implements TypeTypeKind {
-            /** Indicates the {@code extends} keyword*/
-            EXTENDS("extends"),
-            /** Indicates the {@code permits} keyword*/
-            PERMITS("permits"),
-            ;
-            final String text;
-            Listing(String text) {this.text = text;}
-            @Override public String text() {return this.text;}
-        }
-        
-        /**
-         * Represents the token syntax.
-         */
-        enum Syntax implements TypeTypeKind {
-            /** Indicates the {@code syntax} keyword*/
-            SYNTAX("syntax")
-            ;
-            final String text;
-            Syntax(String text) {this.text = text;}
-            @Override public String text() {return this.text;}
-        }
-        
-        /**
-         * Represents the token that refer to the types.
-         */
-        enum Variable implements TypeTypeKind {
-            /** Indicates the {@code this} keyword*/
-            THIS("this"),
-            /** Indicates the {@code child} keyword*/
-            CHILD("child"),
-            /** Indicates the {@code super} keyword*/
-            SUPER("super")
-            ;
-            final String text;
-            Variable(String text) {this.text = text;}
-            @Override public String text() {return this.text;}
-        }
-    }
-    
-    /**
-     * Represents the keywords that define the modifiers of methods, classes, structures, variables, etc.
-     */
-    sealed interface ModifierTypeKind
-             extends KeywordKind
-             permits ModifierTypeKind.Visibility,
-                     ModifierTypeKind.Inheritance,
-                     ModifierTypeKind.Dynamism {
-        /**
-         * Represents the keywords that define visibility
-         * <br>
-         * There are 4 types of visibility:
-         * <table>
-         *     <caption>
-         *         Types of visibility / access
-         *     </caption>
-         *     <tr>
-         *         <th>Keyword</th>
-         *         <th>Visibility rules</th>
-         *     </tr>
-         *     <tr>
-         *         <td>public</td>
-         *         <td>Anyone from anywhere can access</td>
-         *     </tr>
-         *     <tr>
-         *         <td>(package-protected)</td>
-         *         <td>Only classes inside the same package can access</td>
-         *     </tr>
-         *     <tr>
-         *         <td>protected</td>
-         *         <td>Only child classes can access</td>
-         *     </tr>
-         *     <tr>
-         *         <td>private</td>
-         *         <td>No class can access (except itself)</td>
-         *     </tr>
-         * </table>
-         */
-        enum Visibility implements ModifierTypeKind {
-            /** Indicates the {@code public} keyword*/
-            PUBLIC("public"),
-            /** Indicates the {@code protected} keyword*/
-            PROTECTED("protected"),
-            /** Indicates the {@code private} keyword*/
-            PRIVATE("private"),
-            ;
-            final String text;
-            Visibility(String text) {this.text = text;}
-            @Override public String text() {return this.text;}
-        }
-        
-        /**
-         * Represents the keywords that define inheritance.
-         * <br>
-         * There are 4 types of inheritance:
-         * <table>
-         *     <caption>
-         *         Types of inheritance
-         *     </caption>
-         *     <tr>
-         *         <th>Keyword</th>
-         *         <th>Inheritance rules</th>
-         *     </tr>
-         *     <tr>
-         *         <td>open</td>
-         *         <td>Anyone from anywhere can inherit</td>
-         *     </tr>
-         *     <tr>
-         *         <td>(internal)</td>
-         *         <td>Only classes inside the same package can inherit</td>
-         *     </tr>
-         *     <tr>
-         *         <td>sealed</td>
-         *         <td>Only the listed classes can inherit</td>
-         *     </tr>
-         *     <tr>
-         *         <td>closed</td>
-         *         <td>No class can inherit</td>
-         *     </tr>
-         * </table>
-         */
-        enum Inheritance implements ModifierTypeKind {
-            /** Indicates the {@code open} keyword*/
-            OPEN("open"),
-            /** Indicates the {@code sealed} keyword*/
-            SEALED("sealed"),
-            /** Indicates the {@code closed} keyword*/
-            CLOSED("closed"),
-            ;
-            final String text;
-            Inheritance(String text) {this.text = text;}
-            @Override public String text() {return this.text;}
-        }
-        
-        /**
-         * Represents the keywords that define dynamism
-         */
-        enum Dynamism implements ModifierTypeKind {
-            /** Indicates the {@code static} keyword*/
-            STATIC("static"),
-            ;
-            final String text;
-            Dynamism(String text) {this.text = text;}
-            @Override public String text() {return this.text;}
+        sealed interface Modifier
+                 extends KeywordKind
+                 permits Modifier.Visibility,
+                         Modifier.Inheritance,
+                         Modifier.Dynamism {
+            /**
+             * Represents the keywords that define visibility
+             * <br>
+             * There are 4 types of visibility:
+             * <table>
+             *     <caption>
+             *         Types of visibility / access
+             *     </caption>
+             *     <tr>
+             *         <th>Keyword</th>
+             *         <th>Visibility rules</th>
+             *     </tr>
+             *     <tr>
+             *         <td>public</td>
+             *         <td>Anyone from anywhere can access</td>
+             *     </tr>
+             *     <tr>
+             *         <td>(package-protected)</td>
+             *         <td>Only classes inside the same package can access</td>
+             *     </tr>
+             *     <tr>
+             *         <td>protected</td>
+             *         <td>Only child classes can access</td>
+             *     </tr>
+             *     <tr>
+             *         <td>private</td>
+             *         <td>No class can access (except itself)</td>
+             *     </tr>
+             * </table>
+             */
+            enum Visibility implements Modifier {
+                /** Indicates the {@code public} keyword*/
+                PUBLIC("public"),
+                /** Indicates the {@code protected} keyword*/
+                PROTECTED("protected"),
+                /** Indicates the {@code private} keyword*/
+                PRIVATE("private"),
+                ;
+                final String text;
+                Visibility(String text) {this.text = text;}
+                @Override public String text() {return this.text;}
+            }
+            
+            /**
+             * Represents the keywords that define inheritance.
+             * <br>
+             * There are 4 types of inheritance:
+             * <table>
+             *     <caption>
+             *         Types of inheritance
+             *     </caption>
+             *     <tr>
+             *         <th>Keyword</th>
+             *         <th>Inheritance rules</th>
+             *     </tr>
+             *     <tr>
+             *         <td>open</td>
+             *         <td>Anyone from anywhere can inherit</td>
+             *     </tr>
+             *     <tr>
+             *         <td>(internal)</td>
+             *         <td>Only classes inside the same package can inherit</td>
+             *     </tr>
+             *     <tr>
+             *         <td>sealed</td>
+             *         <td>Only the listed classes can inherit</td>
+             *     </tr>
+             *     <tr>
+             *         <td>closed</td>
+             *         <td>No class can inherit</td>
+             *     </tr>
+             * </table>
+             */
+            enum Inheritance implements Modifier {
+                /** Indicates the {@code open} keyword*/
+                OPEN("open"),
+                /** Indicates the {@code sealed} keyword*/
+                SEALED("sealed"),
+                /** Indicates the {@code closed} keyword*/
+                CLOSED("closed"),
+                ;
+                final String text;
+                Inheritance(String text) {this.text = text;}
+                @Override public String text() {return this.text;}
+            }
+            
+            /**
+             * Represents the keywords that define dynamism
+             */
+            enum Dynamism implements Modifier {
+                /** Indicates the {@code static} keyword*/
+                STATIC("static"),
+                ;
+                final String text;
+                Dynamism(String text) {this.text = text;}
+                @Override public String text() {return this.text;}
+            }
         }
     }
     
@@ -556,22 +556,22 @@ public sealed interface Token {
         
         static {
             KEYWORD_KIND_LIST = new java.util.ArrayList<>();
-            KEYWORD_KIND_LIST.addAll(List.of(FlowTypeKind.values()));
+            KEYWORD_KIND_LIST.addAll(List.of(KeywordKind.Flow.values()));
             
             /* Data kinds */
-            KEYWORD_KIND_LIST.addAll(List.of(DataTypeKind.Other.values()));
-            KEYWORD_KIND_LIST.addAll(List.of(DataTypeKind.Number.values()));
+            KEYWORD_KIND_LIST.addAll(List.of(KeywordKind.Data.Other.values()));
+            KEYWORD_KIND_LIST.addAll(List.of(KeywordKind.Data.Number.values()));
             
             /* Type kinds */
-            KEYWORD_KIND_LIST.addAll(List.of(TypeTypeKind.Creation.values()));
-            KEYWORD_KIND_LIST.addAll(List.of(TypeTypeKind.Listing.values()));
-            KEYWORD_KIND_LIST.addAll(List.of(TypeTypeKind.Syntax.values()));
-            KEYWORD_KIND_LIST.addAll(List.of(TypeTypeKind.Variable.values()));
+            KEYWORD_KIND_LIST.addAll(List.of(KeywordKind.Type.Creation.values()));
+            KEYWORD_KIND_LIST.addAll(List.of(KeywordKind.Type.Listing.values()));
+            KEYWORD_KIND_LIST.addAll(List.of(KeywordKind.Type.Syntax.values()));
+            KEYWORD_KIND_LIST.addAll(List.of(KeywordKind.Type.Variable.values()));
             
             /* Modifier kinds */
-            KEYWORD_KIND_LIST.addAll(List.of(ModifierTypeKind.Visibility.values()));
-            KEYWORD_KIND_LIST.addAll(List.of(ModifierTypeKind.Inheritance.values()));
-            KEYWORD_KIND_LIST.addAll(List.of(ModifierTypeKind.Dynamism.values()));
+            KEYWORD_KIND_LIST.addAll(List.of(KeywordKind.Modifier.Visibility.values()));
+            KEYWORD_KIND_LIST.addAll(List.of(KeywordKind.Modifier.Inheritance.values()));
+            KEYWORD_KIND_LIST.addAll(List.of(KeywordKind.Modifier.Dynamism.values()));
             
             BY_CHAR = Arrays.stream(SymbolKind.values())
                             .collect(java.util.stream.Collectors.toMap(k -> k.ch, k -> k));
