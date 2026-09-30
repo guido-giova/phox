@@ -129,7 +129,9 @@ public final class NumberScanner extends TextScanner {
         
         this.computeValue();
         this.resolveKind();
-        return new NumberScannerResponse(new Token.NumberLiteral.Unresolved(this.beginIndex, this.text, this.value, this.kind), this.index);
+        
+        Token.NumberLiteral.Unresolved numberLiteral = new Token.NumberLiteral.Unresolved(this.beginIndex, this.text.substring(this.beginIndex, this.index), this.value, this.kind);
+        return new NumberScannerResponse(numberLiteral, this.index);
     }
     
     private CharPredicate getPredicate() {
