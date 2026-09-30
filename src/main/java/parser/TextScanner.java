@@ -88,4 +88,14 @@ public abstract class TextScanner {
     protected String substring(int beginIndex, int endIndex) {
         return this.text.substring(beginIndex, endIndex);
     }
+    
+    /**
+     * Returns the {@code char} value at the specified index.
+     *
+     * @param index of the {@code char} value.
+     * @return the {@code char} at the specified index
+     */
+    protected char charAt(int index) {
+        return this.text.charAt(index);
+    }
 }

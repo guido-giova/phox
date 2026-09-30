@@ -40,14 +40,14 @@ public final class Scanner extends TextScanner {
                 continue;
             }
             
-            if (cc == '/' && this.hasRun(2) && text.charAt(this.index + 1) == '*') {
+            if (cc == '/' && this.hasRun(2) && this.charAt(this.index + 1) == '*') {
                 this.tokenizeAndAddToList(tokens, lastIndex, this.index);
                 tokens.add(this.scanComment());
                 lastIndex = this.index;
                 continue;
             }
             
-            boolean atIdentifierBoundary = (this.index == 0) || !Chars.isIdentifierChar(text.charAt(this.index - 1));
+            boolean atIdentifierBoundary = (this.index == 0) || !Chars.isIdentifierChar(this.charAt(this.index - 1));
             if (Chars.isDecDigit(cc) && atIdentifierBoundary) {
                 this.tokenizeAndAddToList(tokens, lastIndex, this.index);
                 tokens.add(this.scanNumber());
@@ -121,7 +121,7 @@ public final class Scanner extends TextScanner {
         if (! this.hasRun(2)) {
             throw new IllegalArgumentException("Trailing escape character at " + this.index);
         }
-        char next = this.text.charAt(this.index + 1);
+        char next = this.charAt(this.index + 1);
         char escaped;
         switch (next) {
             case 'n'  -> { this.index += 2; escaped = '\n'; }
@@ -148,7 +148,7 @@ public final class Scanner extends TextScanner {
         final int start = this.consume(2); // skip opening "/*"
         
         while (this.hasRun(2)) {
-            if (this.getCurrent() == '*' && text.charAt(this.index + 1) == '/') {
+            if (this.getCurrent() == '*' && this.charAt(this.index + 1) == '/') {
                 this.consume(2);
                 return new Token.Comment(start, sb.toString());
             }
