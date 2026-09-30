@@ -14,7 +14,7 @@ public final class Scanner extends TextScanner {
     }
     
     private void tokenizeAndAddToList(List<Token> tokens, int beginIndex, int endIndex) {
-        String substring = this.text.substring(beginIndex, endIndex);
+        String substring = this.substring(beginIndex, endIndex);
         List<Token> tokenized = Lexer.tokenize(substring, beginIndex);
         tokens.addAll(tokenized);
     }
@@ -76,7 +76,7 @@ public final class Scanner extends TextScanner {
             
             if (cur == '\"') {
                 this.consume();
-                return new Token.StringLiteral(start, this.text.substring(start + 1, this.index - 1), sb.toString());
+                return new Token.StringLiteral(start, this.substring(start + 1, this.index - 1), sb.toString());
             }
             
             sb.append(cur);
@@ -114,7 +114,7 @@ public final class Scanner extends TextScanner {
         }
         
         this.consume();
-        return new Token.CharacterLiteral(start, this.text.substring(start + 1, this.index - 1), cc);
+        return new Token.CharacterLiteral(start, this.substring(start + 1, this.index - 1), cc);
     }
     
     private char scanEscapedCharacter() {
@@ -134,7 +134,7 @@ public final class Scanner extends TextScanner {
                 if (this.index + 6 > this.length) {
                     throw new IllegalArgumentException("Invalid Unicode escape at " + this.index);
                 }
-                String hex = this.text.substring(this.index + 2, this.index + 6);
+                String hex = this.substring(this.index + 2, this.index + 6);
                 this.index += 6;
                 escaped = (char) Integer.parseInt(hex, 16);
             }

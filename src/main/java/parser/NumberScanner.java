@@ -219,7 +219,7 @@ public final class NumberScanner extends TextScanner {
     
     private void checkForType() {
         if(! this.hasRun(3)) {return;}
-        Optional<Token.DataTypeKind.Number> chosenKind = Token.KeywordKind.getByText(Token.DataTypeKind.Number.class, this.text.substring(this.index, this.index + 3));
+        Optional<Token.DataTypeKind.Number> chosenKind = Token.KeywordKind.getByText(Token.DataTypeKind.Number.class, this.substring(this.index, this.index + 3));
         if (chosenKind.isPresent()) {
             this.desiredKind = chosenKind.get();
             this.consume(3);

@@ -54,4 +54,25 @@ public abstract class TextScanner {
     protected int consume() {
         return this.consume(1);
     }
+    
+    /**
+     * Returns a substring of text starting at the given index and ending at the end of the string.
+     *
+     * @param beginIndex The beginning index (inclusive).
+     * @return A substring of the current text.
+     */
+    protected String substring(int beginIndex) {
+        return this.substring(beginIndex, this.length);
+    }
+    
+    /**
+     * Returns a substring of text starting at beginIndex and ending at endIndex.
+     *
+     * @param beginIndex The beginning index (inclusive).
+     * @param endIndex   The ending index (exclusive).
+     * @return A substring of the current text.
+     */
+    protected String substring(int beginIndex, int endIndex) {
+        return this.text.substring(beginIndex, endIndex);
+    }
 }
