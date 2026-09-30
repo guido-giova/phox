@@ -7,7 +7,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Optional;
 
 public class NumberScanner {
@@ -49,14 +48,7 @@ public class NumberScanner {
         }
     }
     
-    record NumberScannerResponse(Token token, int endIndex) {}
-    
-    private static final Map<String, Token.DataTypeKind> PREFIXES = Map.of(
-            "i32", Token.DataTypeKind.INT32,
-            "i64", Token.DataTypeKind.INT64,
-            "f32", Token.DataTypeKind.FLOAT32,
-            "f64", Token.DataTypeKind.FLOAT64
-    );
+    record NumberScannerResponse(Token.NumberLiteral.Unresolved token, int endIndex) {}
     
     private final String text;
     private final int length;
@@ -64,8 +56,8 @@ public class NumberScanner {
     private int index;
     
     private BigDecimal value;
-    private Token.DataTypeKind kind;
-    private Token.DataTypeKind desiredKind;
+    private Token.DataTypeKind.Number kind;
+    private Token.DataTypeKind.Number desiredKind;
     private Base base;
     private String wholePart;
     private String decimalPart;
@@ -78,12 +70,12 @@ public class NumberScanner {
         this.beginIndex = beginIndex;
         this.index      = beginIndex;
         
-        this.value = null;
-        this.kind = null;
-        this.desiredKind = null;
-        this.base = null;
-        this.wholePart = null;
-        this.decimalPart = null;
+        this.value        = null;
+        this.kind         = null;
+        this.desiredKind  = null;
+        this.base         = null;
+        this.wholePart    = null;
+        this.decimalPart  = null;
         this.exponentType = null;
         this.exponentPart = null;
     }
@@ -135,17 +127,6 @@ public class NumberScanner {
         return this.scanNumberBody();
     }
     
-    private Token createNumberliteralToken() {
-        final String numberString = this.text.substring(this.beginIndex, this.index);
-        return switch (this.kind) {
-            case INT32   -> new Token.NumberLiteral.Int32(this.beginIndex, numberString, this.value.intValue());
-            case INT64   -> new Token.NumberLiteral.Int64(this.beginIndex, numberString, this.value.longValue());
-            case FLOAT32 -> new Token.NumberLiteral.Float32(this.beginIndex, numberString, this.value.floatValue());
-            case FLOAT64 -> new Token.NumberLiteral.Float64(this.beginIndex, numberString, this.value.doubleValue());
-            default      -> throw new IllegalStateException("Unexpected value: " + this.kind);
-        };
-    }
-    
     private NumberScannerResponse scanNumberBody() {
         CharPredicate isDigit = this.getPredicate();
         this.wholePart = this.consumeDigitRun(isDigit);
@@ -170,7 +151,7 @@ public class NumberScanner {
         
         this.computeValue();
         this.resolveKind();
-        return new NumberScannerResponse(this.createNumberliteralToken(), this.index);
+        return new NumberScannerResponse(new Token.NumberLiteral.Unresolved(this.beginIndex, this.text, this.value, this.kind), this.index);
     }
     
     private CharPredicate getPredicate() {
@@ -215,40 +196,54 @@ public class NumberScanner {
         boolean isIntegral = this.value.stripTrailingZeros().scale() <= 0;
         
         if (this.desiredKind != null) {
-            if (! isIntegral && ! Token.DataTypeKind.isFloatingPoint(this.desiredKind)) {
+            if (! isIntegral && ! Token.DataTypeKind.Number.isFloatingPoint(this.desiredKind)) {
                 throw new IllegalArgumentException("Value " + value + " has a fractional result but " + this.desiredKind + " can't hold decimals at " + this.index);
             }
             this.kind = this.desiredKind;
             return;
         }
         
-        this.kind = isIntegral ? Token.DataTypeKind.INT32 : Token.DataTypeKind.FLOAT64;
+        this.kind = isIntegral ? Token.DataTypeKind.Number.INT32 : Token.DataTypeKind.Number.FLOAT64;
     }
     
     private String consumeDigitRun(CharPredicate isDigit) {
         if (! this.hasCurrent() || isDigit.negate().test(getCurrent())) {
             throw new IllegalArgumentException("Expected digit at " + this.index);
         }
+        if (this.getCurrent() == '_') {
+            throw new IllegalArgumentException("Illegal underscore placement at " + this.index);
+        }
+        
         StringBuilder sb = new StringBuilder();
+        boolean expectNumberAfterUnderscore = false;
         while (this.hasCurrent()) {
             char cc = this.getCurrent();
+            
             if (isDigit.test(cc)) {
+                expectNumberAfterUnderscore = false;
                 sb.append(cc);
                 this.consume();
-            } else if (cc == '_' && this.hasRun(1) && isDigit.test(this.text.charAt(this.index + 1))) {
+            } else if (cc == '_') {
+                expectNumberAfterUnderscore = true;
                 this.consume(); // skip separator; loop consumes the digit right after it
             } else {
+                if (expectNumberAfterUnderscore) {
+                    throw new IllegalArgumentException("Illegal underscore placement at " + this.index);
+                }
                 return sb.toString();
             }
+        }
+        if (expectNumberAfterUnderscore) {
+            throw new IllegalArgumentException("Illegal underscore placement at " + this.index);
         }
         return sb.toString();
     }
     
     private void checkForType() {
         if(! this.hasRun(3)) {return;}
-        Token.DataTypeKind chosenKind = PREFIXES.get(this.text.substring(this.index, this.index + 3));
-        if (chosenKind != null) {
-            this.desiredKind = chosenKind;
+        Optional<Token.DataTypeKind.Number> chosenKind = Token.KeywordKind.getByText(Token.DataTypeKind.Number.class, this.text.substring(this.index, this.index + 3));
+        if (chosenKind.isPresent()) {
+            this.desiredKind = chosenKind.get();
             this.consume(3);
         }
     }
