@@ -250,6 +250,9 @@ public sealed interface Token {
              extends KeywordKind
              permits DataTypeKind.NumberDataKind,
                      DataTypeKind.OtherDataKind {
+        /**
+         * Represents data types that are not numbers
+         */
         enum OtherDataKind implements DataTypeKind {
             /** void primitive */
             VOID("void"),
@@ -261,6 +264,9 @@ public sealed interface Token {
             @Override public String text() {return this.text;}
         }
         
+        /**
+         * Represents data kinds that represents numbers
+         */
         enum NumberDataKind implements DataTypeKind {
             /** int32 primitive */
             INT32("int32"),
