@@ -4,15 +4,9 @@ import utils.Chars;
 
 import java.util.List;
 
-public final class Scanner {
-    private final String text;
-    private final int length;
-    private int index;
-    
+public final class Scanner extends TextScanner {
     private Scanner(String text) {
-        this.text   = text;
-        this.length = text.length();
-        this.index  = 0;
+        super(text, 0);
     }
     
     public static List<Token> scan(String text) {
@@ -21,16 +15,6 @@ public final class Scanner {
     
     private boolean hasNext() {
         return this.index < this.length;
-    }
-    
-    private int consume(int n) {
-        int lastIndex = this.index;
-        this.index += n;
-        return lastIndex;
-    }
-    
-    private int consume() {
-        return this.consume(1);
     }
     
     private void tokenizeAndAddToList(List<Token> tokens, int beginIndex, int endIndex) {
