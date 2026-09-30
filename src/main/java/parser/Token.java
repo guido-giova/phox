@@ -92,7 +92,7 @@ public sealed interface Token {
          */
         record Float64(int start, String raw, BigDecimal value) implements NumberLiteral {}
         
-        record Unresolved(int start, String raw, int magnitude, DataTypeKind.NumberDataKind kind) implements NumberLiteral {}
+        record Unresolved(int start, String raw, int magnitude, DataTypeKind.Number kind) implements NumberLiteral {}
     }
     
     /**
@@ -248,26 +248,26 @@ public sealed interface Token {
      */
     sealed interface DataTypeKind
              extends KeywordKind
-             permits DataTypeKind.NumberDataKind,
-                     DataTypeKind.OtherDataKind {
+             permits DataTypeKind.Number,
+                     DataTypeKind.Other {
         /**
          * Represents data types that are not numbers
          */
-        enum OtherDataKind implements DataTypeKind {
+        enum Other implements DataTypeKind {
             /** void primitive */
             VOID("void"),
             /** bool primitive */
             BOOL("bool"),
             ;
             final String text;
-            OtherDataKind(String text) {this.text = text;}
+            Other(String text) {this.text = text;}
             @Override public String text() {return this.text;}
         }
         
         /**
          * Represents data kinds that represents numbers
          */
-        enum NumberDataKind implements DataTypeKind {
+        enum Number implements DataTypeKind {
             /** int32 primitive */
             INT32("int32"),
             /** int64 primitive */
@@ -278,7 +278,7 @@ public sealed interface Token {
             FLOAT64("float64")
             ;
             final String text;
-            NumberDataKind(String text) {this.text = text;}
+            Number(String text) {this.text = text;}
             @Override public String text() {return this.text;}
             
             /**
@@ -519,8 +519,8 @@ public sealed interface Token {
             KEYWORD_KIND_LIST.addAll(List.of(FlowTypeKind.values()));
             
             /* Data kinds */
-            KEYWORD_KIND_LIST.addAll(List.of(DataTypeKind.OtherDataKind.values()));
-            KEYWORD_KIND_LIST.addAll(List.of(DataTypeKind.NumberDataKind.values()));
+            KEYWORD_KIND_LIST.addAll(List.of(DataTypeKind.Other.values()));
+            KEYWORD_KIND_LIST.addAll(List.of(DataTypeKind.Number.values()));
             
             /* Type kinds */
             KEYWORD_KIND_LIST.addAll(List.of(TypeTypeKind.Creation.values()));
