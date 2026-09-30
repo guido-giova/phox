@@ -324,70 +324,70 @@ public sealed interface Token {
      */
     sealed interface TypeTypeKind
              extends KeywordKind
-             permits TypeCreationKind,
-                     TypeListingKind,
-                     TypeSyntaxKind,
-                     TypeVariableKind {}
-    
-    /**
-     * Represents type creation keywords.
-     */
-    enum TypeCreationKind implements TypeTypeKind {
-        /** Indicates the {@code class} keyword*/
-        CLASS("class"),
-        /** Indicates the {@code structure} keyword*/
-        STRUCTURE("structure"),
-        /** Indicates the {@code enum} keyword*/
-        ENUM("enum"),
-        /** Indicates the {@code data} keyword*/
-        DATA("data"),
-        /** Indicates the {@code single} keyword*/
-        SINGLE("single");
-        final String text;
-        TypeCreationKind(String text) {this.text = text;}
-        @Override public String text() {return this.text;}
-    }
-    
-    /**
-     * Represents modifications of a type.
-     */
-    enum TypeListingKind implements TypeTypeKind {
-        /** Indicates the {@code extends} keyword*/
-        EXTENDS("extends"),
-        /** Indicates the {@code permits} keyword*/
-        PERMITS("permits"),
-        ;
-        final String text;
-        TypeListingKind(String text) {this.text = text;}
-        @Override public String text() {return this.text;}
-    }
-    
-    /**
-     * Represents the token syntax.
-     */
-    enum TypeSyntaxKind implements TypeTypeKind {
-        /** Indicates the {@code syntax} keyword*/
-        SYNTAX("syntax")
-        ;
-        final String text;
-        TypeSyntaxKind(String text) {this.text = text;}
-        @Override public String text() {return this.text;}
-    }
-    
-    /**
-     * Represents the token that refer to the types.
-     */
-    enum TypeVariableKind implements TypeTypeKind {
-        /** Indicates the {@code this} keyword*/
-        THIS("this"),
-        /** Indicates the {@code child} keyword*/
-        CHILD("child"),
-        /** Indicates the {@code super} keyword*/
-        SUPER("super")
-        ;
-        final String text;
-        TypeVariableKind(String text) {this.text = text;}
-        @Override public String text() {return this.text;}
+             permits TypeTypeKind.Creation,
+                     TypeTypeKind.Listing,
+                     TypeTypeKind.Syntax,
+                     TypeTypeKind.Variable {
+        /**
+         * Represents type creation keywords.
+         */
+        enum Creation implements TypeTypeKind {
+            /** Indicates the {@code class} keyword*/
+            CLASS("class"),
+            /** Indicates the {@code structure} keyword*/
+            STRUCTURE("structure"),
+            /** Indicates the {@code enum} keyword*/
+            ENUM("enum"),
+            /** Indicates the {@code data} keyword*/
+            DATA("data"),
+            /** Indicates the {@code single} keyword*/
+            SINGLE("single");
+            final String text;
+            Creation(String text) {this.text = text;}
+            @Override public String text() {return this.text;}
+        }
+        
+        /**
+         * Represents modifications of a type.
+         */
+        enum Listing implements TypeTypeKind {
+            /** Indicates the {@code extends} keyword*/
+            EXTENDS("extends"),
+            /** Indicates the {@code permits} keyword*/
+            PERMITS("permits"),
+            ;
+            final String text;
+            Listing(String text) {this.text = text;}
+            @Override public String text() {return this.text;}
+        }
+        
+        /**
+         * Represents the token syntax.
+         */
+        enum Syntax implements TypeTypeKind {
+            /** Indicates the {@code syntax} keyword*/
+            SYNTAX("syntax")
+            ;
+            final String text;
+            Syntax(String text) {this.text = text;}
+            @Override public String text() {return this.text;}
+        }
+        
+        /**
+         * Represents the token that refer to the types.
+         */
+        enum Variable implements TypeTypeKind {
+            /** Indicates the {@code this} keyword*/
+            THIS("this"),
+            /** Indicates the {@code child} keyword*/
+            CHILD("child"),
+            /** Indicates the {@code super} keyword*/
+            SUPER("super")
+            ;
+            final String text;
+            Variable(String text) {this.text = text;}
+            @Override public String text() {return this.text;}
+        }
     }
     
     /**
@@ -518,10 +518,10 @@ public sealed interface Token {
             KEYWORD_KIND_LIST.addAll(List.of(DataTypeKind.NumberDataKind.values()));
             
             /* Type kinds */
-            KEYWORD_KIND_LIST.addAll(List.of(TypeCreationKind.values()));
-            KEYWORD_KIND_LIST.addAll(List.of(TypeListingKind.values()));
-            KEYWORD_KIND_LIST.addAll(List.of(TypeSyntaxKind.values()));
-            KEYWORD_KIND_LIST.addAll(List.of(TypeVariableKind.values()));
+            KEYWORD_KIND_LIST.addAll(List.of(TypeTypeKind.Creation.values()));
+            KEYWORD_KIND_LIST.addAll(List.of(TypeTypeKind.Listing.values()));
+            KEYWORD_KIND_LIST.addAll(List.of(TypeTypeKind.Syntax.values()));
+            KEYWORD_KIND_LIST.addAll(List.of(TypeTypeKind.Variable.values()));
             
             /* Modifier kinds */
             KEYWORD_KIND_LIST.addAll(List.of(VisibilityTypeKind.values()));
