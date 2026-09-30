@@ -230,9 +230,9 @@ public sealed interface Token {
      */
     sealed interface KeywordKind
              permits /* enums */
-                     DataTypeKind,
                      FlowTypeKind,
                      /* interfaces */
+                     DataTypeKind,
                      TypeTypeKind,
                      ModifierTypeKind {
         /**
@@ -244,42 +244,54 @@ public sealed interface Token {
     /**
      * Represents the primitives and other data types.
      */
-    enum DataTypeKind implements KeywordKind {
-        /** void primitive */
-        VOID("void"),
-        /** bool primitive */
-        BOOL("bool"),
-        /** int32 primitive */
-        INT32("int32"),
-        /** int64 primitive */
-        INT64("int64"),
-        /** float32 primitive */
-        FLOAT32("float32"),
-        /** float64 primitive */
-        FLOAT64("float64")
-        ;
-        final String text;
-        DataTypeKind(String text) {this.text = text;}
-        @Override public String text() {return this.text;}
-        
-        /**
-         * Informs if the given DataTypeKind represents a floating point number primitive.
-         *
-         * @param kind that wants to be checked
-         * @return {@code true} if it is a floating point number, {@code false} otherwise.
-         */
-        public static boolean isFloatingPoint(DataTypeKind kind) {
-            return kind == FLOAT32 || kind == FLOAT64;
+    sealed interface DataTypeKind
+             extends KeywordKind
+             permits DataTypeKind.NumberDataKind,
+                     DataTypeKind.OtherDataKind {
+        enum OtherDataKind implements DataTypeKind {
+            /** void primitive */
+            VOID("void"),
+            /** bool primitive */
+            BOOL("bool"),
+            ;
+            final String text;
+            OtherDataKind(String text) {this.text = text;}
+            @Override public String text() {return this.text;}
         }
         
-        /**
-         * Informs if the given DataTypeKind represents an integer number primitive.
-         *
-         * @param kind that wants to be checked
-         * @return {@code true} if it is an integer number, {@code false} otherwise.
-         */
-        public static boolean isInteger(DataTypeKind kind) {
-            return kind == INT32 || kind == INT64;
+        enum NumberDataKind implements DataTypeKind {
+            /** int32 primitive */
+            INT32("int32"),
+            /** int64 primitive */
+            INT64("int64"),
+            /** float32 primitive */
+            FLOAT32("float32"),
+            /** float64 primitive */
+            FLOAT64("float64")
+            ;
+            final String text;
+            NumberDataKind(String text) {this.text = text;}
+            @Override public String text() {return this.text;}
+            
+            /**
+             * Informs if the given DataTypeKind represents a floating point number primitive.
+             *
+             * @param kind that wants to be checked
+             * @return {@code true} if it is a floating point number, {@code false} otherwise.
+             */
+            public static boolean isFloatingPoint(DataTypeKind kind) {
+                return kind == FLOAT32 || kind == FLOAT64;
+            }
+            
+            /**
+             * Informs if the given DataTypeKind represents an integer number primitive.
+             *
+             * @param kind that wants to be checked
+             * @return {@code true} if it is an integer number, {@code false} otherwise.
+             */
+            public static boolean isInteger(DataTypeKind kind) {
+                return kind == INT32 || kind == INT64;
+            }
         }
     }
     
@@ -497,8 +509,11 @@ public sealed interface Token {
         
         static {
             KEYWORD_KIND_LIST = new java.util.ArrayList<>();
-            KEYWORD_KIND_LIST.addAll(List.of(DataTypeKind.values()));
             KEYWORD_KIND_LIST.addAll(List.of(FlowTypeKind.values()));
+            
+            /* Data kinds */
+            KEYWORD_KIND_LIST.addAll(List.of(DataTypeKind.OtherDataKind.values()));
+            KEYWORD_KIND_LIST.addAll(List.of(DataTypeKind.NumberDataKind.values()));
             
             /* Type kinds */
             KEYWORD_KIND_LIST.addAll(List.of(TypeCreationKind.values()));
