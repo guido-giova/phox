@@ -84,16 +84,6 @@ public final class NumberScanner extends TextScanner {
     
     private boolean hasRun(int count) {return this.index + count <= this.length;}
     
-    private int consume(int n) {
-        int lastIndex = this.index;
-        this.index += n;
-        return lastIndex;
-    }
-    
-    private int consume() {
-        return this.consume(1);
-    }
-    
     static NumberScannerResponse scanNumber(String text, int beginIndex) {
         return new NumberScanner(text, beginIndex).scanNumber();
     }
