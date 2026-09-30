@@ -63,7 +63,7 @@ public sealed interface Token {
          * @param raw   The raw data of the number literal
          * @param value The value itself
          */
-        record Int32(int start, String raw, BigDecimal value) implements NumberLiteral {}
+        record Int32(int start, String raw, int value) implements NumberLiteral {}
         
         /**
          * Represents a 64-bit integer.
@@ -72,7 +72,7 @@ public sealed interface Token {
          * @param raw   The raw data of the number literal
          * @param value The value itself
          */
-        record Int64(int start, String raw, BigDecimal value) implements NumberLiteral {}
+        record Int64(int start, String raw, long value) implements NumberLiteral {}
         
         /**
          * Represents a 32-bit float.
@@ -81,7 +81,7 @@ public sealed interface Token {
          * @param raw   The raw data of the number literal
          * @param value The value itself
          */
-        record Float32(int start, String raw, BigDecimal value) implements NumberLiteral {}
+        record Float32(int start, String raw, float value) implements NumberLiteral {}
         
         /**
          * Represents a 64-bit float.
@@ -90,9 +90,17 @@ public sealed interface Token {
          * @param raw   The raw data of the number literal
          * @param value The value itself
          */
-        record Float64(int start, String raw, BigDecimal value) implements NumberLiteral {}
+        record Float64(int start, String raw, double value) implements NumberLiteral {}
         
-        record Unresolved(int start, String raw, int magnitude, DataTypeKind.Number kind) implements NumberLiteral {}
+        /**
+         * Represents a number literal that is yet to be resolved
+         *
+         * @param start Beginning index in the class definition
+         * @param raw   The raw data of the number literal
+         * @param value The value itself
+         * @param kind  The kind to be mapped to
+         */
+        record Unresolved(int start, String raw, BigDecimal value, DataTypeKind.Number kind) implements NumberLiteral {}
     }
     
     /**
