@@ -13,10 +13,6 @@ public final class Scanner extends TextScanner {
         return new Scanner(text).scan();
     }
     
-    private boolean hasNext() {
-        return this.index < this.length;
-    }
-    
     private void tokenizeAndAddToList(List<Token> tokens, int beginIndex, int endIndex) {
         String substring = this.text.substring(beginIndex, endIndex);
         List<Token> tokenized = Lexer.tokenize(substring, beginIndex);
