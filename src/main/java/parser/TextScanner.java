@@ -17,7 +17,20 @@ public abstract class TextScanner {
      * @return {@code true} if this has a current value, {@code false} otherwise.
      */
     protected boolean hasCurrent() {
-        return this.index < this.length;
+        return this.hasRun(1);
+    }
+    
+    /**
+     * Checks whether at least {@code count} characters remain, starting at the current index (inclusive).
+     *
+     * <p>Equivalent to {@code index + count <= length}. For example, {@code hasRun(1)} is true when there is a current
+     * character, and {@code hasRun(2)} is true when both the current character and the one after it exist.
+     *
+     * @param count the number of characters required, starting at the current index
+     * @return {@code true} if at least {@code count} characters remain from the current index, {@code false} otherwise
+     */
+    protected boolean hasRun(int count) {
+        return this.index + count <= this.length;
     }
     
     /**

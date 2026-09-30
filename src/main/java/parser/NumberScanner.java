@@ -82,8 +82,6 @@ public final class NumberScanner extends TextScanner {
         return Exponent.getBySymbol(this.getCurrent());
     }
     
-    private boolean hasRun(int count) {return this.index + count <= this.length;}
-    
     static NumberScannerResponse scanNumber(String text, int beginIndex) {
         return new NumberScanner(text, beginIndex).scanNumber();
     }

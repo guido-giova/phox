@@ -40,7 +40,7 @@ public final class Scanner extends TextScanner {
                 continue;
             }
             
-            if (cc == '/' && this.index + 1 < this.length && text.charAt(this.index + 1) == '*') {
+            if (cc == '/' && this.hasRun(2) && text.charAt(this.index + 1) == '*') {
                 this.tokenizeAndAddToList(tokens, lastIndex, this.index);
                 tokens.add(this.scanComment());
                 lastIndex = this.index;
@@ -89,7 +89,7 @@ public final class Scanner extends TextScanner {
     private Token scanChar() {
         final int start = this.consume(); // skip opening quote
         
-        if (this.index + 1 >= this.length) {
+        if (! this.hasRun(2)) {
             throw new IllegalArgumentException("Character literal never closed at " + this.index);
         }
         
@@ -104,7 +104,7 @@ public final class Scanner extends TextScanner {
             this.consume();
         }
         
-        if (this.index >= this.length) {
+        if (! this.hasRun(1)) {
             throw new IllegalArgumentException("Character literal never closed at " + this.index);
         }
         
@@ -118,7 +118,7 @@ public final class Scanner extends TextScanner {
     }
     
     private char scanEscapedCharacter() {
-        if (this.index + 1 >= this.length) {
+        if (! this.hasRun(2)) {
             throw new IllegalArgumentException("Trailing escape character at " + this.index);
         }
         char next = this.text.charAt(this.index + 1);
@@ -131,7 +131,7 @@ public final class Scanner extends TextScanner {
             case '"'  -> { this.index += 2; escaped = '\"'; }
             case '\'' -> { this.index += 2; escaped = '\''; }
             case 'u'  -> {
-                if (this.index + 6 > this.length) {
+                if (! this.hasRun(6)) {
                     throw new IllegalArgumentException("Invalid Unicode escape at " + this.index);
                 }
                 String hex = this.substring(this.index + 2, this.index + 6);
@@ -147,7 +147,7 @@ public final class Scanner extends TextScanner {
         StringBuilder sb = new StringBuilder();
         final int start = this.consume(2); // skip opening "/*"
         
-        while (this.index < this.length - 1) {
+        while (this.hasRun(2)) {
             if (this.getCurrent() == '*' && text.charAt(this.index + 1) == '/') {
                 this.consume(2);
                 return new Token.Comment(start, sb.toString());
