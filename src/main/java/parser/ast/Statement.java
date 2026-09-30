@@ -12,4 +12,10 @@ public sealed interface Statement {
      * @param statements inside a block
      */
     record Block(List<Statement> statements) implements Statement {}
+    
+    record Definition(TypeNode type, String name) implements Statement {}
+    
+    record Assignment(String name, Expression expression) implements Statement {}
+    
+    record Return(Expression expression) implements Statement {}
 }
