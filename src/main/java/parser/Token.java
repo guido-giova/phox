@@ -1,6 +1,7 @@
 package parser;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -259,9 +260,9 @@ public sealed interface Token {
          * @return An Optional containing the enum's value if found, empty otherwise.
          */
         static <T extends Enum<T> & KeywordKind> Optional<T> getByText(Class<T> type, String text) {
-            return java.util.Arrays.stream(type.getEnumConstants())
-                                   .filter(e -> e.text().equals(text))
-                                   .findFirst();
+            return Arrays.stream(type.getEnumConstants())
+                         .filter(e -> e.text().equals(text))
+                         .findFirst();
         }
     }
     
@@ -555,8 +556,8 @@ public sealed interface Token {
             KEYWORD_KIND_LIST.addAll(List.of(ModifierTypeKind.Inheritance.values()));
             KEYWORD_KIND_LIST.addAll(List.of(ModifierTypeKind.Dynamism.values()));
             
-            BY_CHAR = java.util.Arrays.stream(SymbolKind.values())
-                                      .collect(java.util.stream.Collectors.toMap(k -> k.ch, k -> k));
+            BY_CHAR = Arrays.stream(SymbolKind.values())
+                            .collect(java.util.stream.Collectors.toMap(k -> k.ch, k -> k));
         }
         
         /**
