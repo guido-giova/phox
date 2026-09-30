@@ -82,8 +82,6 @@ public final class NumberScanner extends TextScanner {
         return Exponent.getBySymbol(this.getCurrent());
     }
     
-    private boolean hasRun(int count) {return this.index + count <= this.length;}
-    
     static NumberScannerResponse scanNumber(String text, int beginIndex) {
         return new NumberScanner(text, beginIndex).scanNumber();
     }
@@ -221,7 +219,7 @@ public final class NumberScanner extends TextScanner {
     
     private void checkForType() {
         if(! this.hasRun(3)) {return;}
-        Optional<Token.DataTypeKind.Number> chosenKind = Token.DataTypeKind.Number.getByPrefix(this.text.substring(this.index, this.index + 3));
+        Optional<Token.DataTypeKind.Number> chosenKind = Token.DataTypeKind.Number.getByPrefix(this.substring(this.index, this.index + 3));
         if (chosenKind.isPresent()) {
             this.desiredKind = chosenKind.get();
             this.consume(3);
