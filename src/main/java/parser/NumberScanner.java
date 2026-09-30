@@ -7,7 +7,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.Optional;
 
 public class NumberScanner {
@@ -91,12 +90,6 @@ public class NumberScanner {
     private Optional<Exponent> isCurrentExponent() {
         if (! this.hasCurrent()) { return Optional.empty(); }
         return Exponent.getBySymbol(this.getCurrent());
-    }
-    
-    private static Optional<Token.DataTypeKind.Number> getByPrefix(String prefix) {
-        return Arrays.stream(Token.DataTypeKind.Number.values())
-                     .filter(e -> Objects.equals(e.text, prefix))
-                     .findFirst();
     }
     
     private boolean hasCurrent() {return this.index < this.length;}
@@ -248,7 +241,7 @@ public class NumberScanner {
     
     private void checkForType() {
         if(! this.hasRun(3)) {return;}
-        Optional<Token.DataTypeKind.Number> chosenKind = NumberScanner.getByPrefix(this.text.substring(this.index, this.index + 3));
+        Optional<Token.DataTypeKind.Number> chosenKind = Token.KeywordKind.getByText(Token.DataTypeKind.Number.class, this.text.substring(this.index, this.index + 3));
         if (chosenKind.isPresent()) {
             this.desiredKind = chosenKind.get();
             this.consume(3);
