@@ -1,5 +1,6 @@
 package parser;
 
+import parser.exception.PhoxNumberInterpretationException;
 import utils.CharPredicate;
 import utils.Chars;
 
@@ -175,7 +176,7 @@ public final class NumberScanner extends TextScanner {
         
         if (this.desiredKind != null) {
             if (! isIntegral && ! Token.DataTypeKind.Number.isFloatingPoint(this.desiredKind)) {
-                throw new IllegalArgumentException("Value " + value + " has a fractional result but " + this.desiredKind + " can't hold decimals at " + this.index);
+                throw new PhoxNumberInterpretationException("Value " + value + " has a fractional result but " + this.desiredKind + " can't hold decimals", this.index);
             }
             this.kind = this.desiredKind;
             return;
@@ -186,10 +187,10 @@ public final class NumberScanner extends TextScanner {
     
     private String consumeDigitRun(CharPredicate isDigit) {
         if (! this.hasCurrent() || isDigit.negate().test(getCurrent())) {
-            throw new IllegalArgumentException("Expected digit at " + this.index);
+            throw new PhoxNumberInterpretationException("Expected digit", this.index);
         }
         if (this.getCurrent() == '_') {
-            throw new IllegalArgumentException("Illegal underscore placement at " + this.index);
+            throw new PhoxNumberInterpretationException("Illegal underscore placement", this.index);
         }
         
         StringBuilder sb = new StringBuilder();
@@ -206,13 +207,13 @@ public final class NumberScanner extends TextScanner {
                 this.consume(); // skip separator; loop consumes the digit right after it
             } else {
                 if (expectNumberAfterUnderscore) {
-                    throw new IllegalArgumentException("Illegal underscore placement at " + this.index);
+                    throw new PhoxNumberInterpretationException("Illegal underscore placement", this.index);
                 }
                 return sb.toString();
             }
         }
         if (expectNumberAfterUnderscore) {
-            throw new IllegalArgumentException("Illegal underscore placement at " + this.index);
+            throw new PhoxNumberInterpretationException("Illegal underscore placement", this.index);
         }
         return sb.toString();
     }
