@@ -1,5 +1,7 @@
 package parser;
 
+import parser.exception.PhoxValidationException;
+
 import java.util.List;
 
 public final class Lexer {
@@ -40,7 +42,7 @@ public final class Lexer {
             
             java.util.Optional<Token> symbolToken = Token.Mapper.getToken(cc, io);
             if (symbolToken.isEmpty()) {
-                throw new IllegalArgumentException("Unknown symbol: '" + cc + "' at " + io);
+                throw new PhoxValidationException("Unknown symbol: '" + cc + "'", io);
             } else {
                 if (sb != null) {
                     tokens.add(new Token.Word(offset + ii - sb.length(), sb.toString()));

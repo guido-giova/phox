@@ -1,5 +1,7 @@
 package parser;
 
+import parser.exception.PhoxValidationException;
+
 import utils.Chars;
 
 import java.util.List;
@@ -176,7 +178,7 @@ public final class Scanner {
             this.consume();
         }
         
-        throw new IllegalArgumentException("Unterminated comment starting at " + this.index);
+        throw new IllegalArgumentException("Unterminated comment starting at " + start);
     }
     
     private Token scanNumber() {
