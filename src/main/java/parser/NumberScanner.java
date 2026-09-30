@@ -131,7 +131,7 @@ public final class NumberScanner extends TextScanner {
             
             String sign = "";
             if (Chars.isSignSymbol(this.getCurrent())) {
-                sign = Character.toString(this.getCurrent());
+                sign = this.getCurrentAsString();
                 this.consume();
             }
             this.exponentPart = sign + this.consumeDigitRun(Chars::isDecDigit);
