@@ -51,8 +51,8 @@ public final class NumberScanner extends TextScanner {
     record NumberScannerResponse(Token.NumberLiteral.Unresolved token, int endIndex) {}
     
     private BigDecimal value;
-    private Token.KeywordKind.Data.Number.Number kind;
-    private Token.KeywordKind.Data.Number.Number desiredKind;
+    private Token.Keyword.Data.Number kind;
+    private Token.Keyword.Data.Number desiredKind;
     private Base base;
     private String wholePart;
     private String decimalPart;
@@ -176,14 +176,14 @@ public final class NumberScanner extends TextScanner {
         boolean isIntegral = this.value.stripTrailingZeros().scale() <= 0;
         
         if (this.desiredKind != null) {
-            if (! isIntegral && ! Token.KeywordKind.Data.Number.isFloatingPoint(this.desiredKind)) {
+            if (! isIntegral && ! Token.Keyword.Data.Number.isFloatingPoint(this.desiredKind)) {
                 throw new IllegalArgumentException("Value " + value + " has a fractional result but " + this.desiredKind + " can't hold decimals at " + this.index);
             }
             this.kind = this.desiredKind;
             return;
         }
         
-        this.kind = isIntegral ? Token.KeywordKind.Data.Number.INT32 : Token.KeywordKind.Data.Number.FLOAT64;
+        this.kind = isIntegral ? Token.Keyword.Data.Number.INT32 : Token.Keyword.Data.Number.FLOAT64;
     }
     
     private String consumeDigitRun(CharPredicate isDigit) {
@@ -221,7 +221,7 @@ public final class NumberScanner extends TextScanner {
     
     private void checkForType() {
         if(! this.hasRun(3)) {return;}
-        Optional<Token.KeywordKind.Data.Number> chosenKind = Token.KeywordKind.Data.Number.getByPrefix(this.text.substring(this.index, this.index + 3));
+        Optional<Token.Keyword.Data.Number> chosenKind = Token.Keyword.Data.Number.getByPrefix(this.text.substring(this.index, this.index + 3));
         if (chosenKind.isPresent()) {
             this.desiredKind = chosenKind.get();
             this.consume(3);

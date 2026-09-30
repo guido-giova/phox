@@ -101,7 +101,7 @@ public sealed interface Token {
          * @param value The value itself
          * @param kind  The kind to be mapped to
          */
-        record Unresolved(int start, String raw, BigDecimal value, KeywordKind.Data.Number kind) implements NumberLiteral {}
+        record Unresolved(int start, String raw, BigDecimal value, Keyword.Data.Number kind) implements NumberLiteral {}
     }
     
     /**
@@ -148,18 +148,6 @@ public sealed interface Token {
     record Comment(int start, String str) implements Token {
         @Override
         public int length() {return "/*".length() + this.str.length() + "*/".length();}
-    }
-    
-    /**
-     * Represents a reserved keyword.
-     *
-     * @param start Beginning index in the class definition
-     * @param kind  Keyword itself
-     * @see KeywordKind
-     */
-    record Keyword(int start, KeywordKind kind) implements Token {
-        @Override
-        public int length() {return this.kind.text().length();}
     }
     
     /**
@@ -237,29 +225,41 @@ public sealed interface Token {
     }
     
     /**
+     * Represents a reserved keyword.
+     *
+     * @param start Beginning index in the class definition
+     * @param kind  Keyword itself
+     * @see Keyword
+     */
+    record Reserved(int start, Keyword kind) implements Token {
+        @Override
+        public int length() {return this.kind.text().length();}
+    }
+    
+    /**
      * Represents the different types of keywords that exist.
      */
-    sealed interface KeywordKind
+    sealed interface Keyword
              permits /* enums */
-                     KeywordKind.Flow,
+                     Keyword.Flow,
                      /* interfaces */
-                     KeywordKind.Data,
-                     KeywordKind.Type,
-                     KeywordKind.Modifier {
+                     Keyword.Data,
+                     Keyword.Type,
+                     Keyword.Modifier {
         /**
          * @return the string it reserves
          */
         String text();
         
         /**
-         * Returns an Optional with the KeywordKind if found by given text.
+         * Returns an Optional with the Keyword if found by given text.
          *
          * @param type of the enum string that is being searched
          * @param text that is being searched
          * @param <T>  type that is returned inside the Optional
          * @return An Optional containing the enum's value if found, empty otherwise.
          */
-        static <T extends Enum<T> & KeywordKind> Optional<T> getByText(Class<T> type, String text) {
+        static <T extends Enum<T> & Keyword> Optional<T> getByText(Class<T> type, String text) {
             return Arrays.stream(type.getEnumConstants())
                          .filter(e -> e.text().equals(text))
                          .findFirst();
@@ -269,7 +269,7 @@ public sealed interface Token {
          * Represents the primitives and other data types.
          */
         sealed interface Data
-                 extends KeywordKind
+                 extends Keyword
                  permits Data.Number,
                          Data.Other {
             /**
@@ -345,7 +345,7 @@ public sealed interface Token {
         /**
          * Represents the keywords that define code flow
          */
-        enum Flow implements KeywordKind {
+        enum Flow implements Keyword {
             /** Indicates the {@code return} keyword*/
             RETURN("return"),
             /** Indicates the {@code if} keyword*/
@@ -368,7 +368,7 @@ public sealed interface Token {
          * Represents the keywords for class and structure definition
          */
         sealed interface Type
-                 extends KeywordKind
+                 extends Keyword
                  permits Type.Creation,
                          Type.Listing,
                          Type.Syntax,
@@ -439,7 +439,7 @@ public sealed interface Token {
          * Represents the keywords that define the modifiers of methods, classes, structures, variables, etc.
          */
         sealed interface Modifier
-                 extends KeywordKind
+                 extends Keyword
                  permits Modifier.Visibility,
                          Modifier.Inheritance,
                          Modifier.Dynamism {
@@ -452,7 +452,7 @@ public sealed interface Token {
              *         Types of visibility / access
              *     </caption>
              *     <tr>
-             *         <th>Keyword</th>
+             *         <th>Reserved</th>
              *         <th>Visibility rules</th>
              *     </tr>
              *     <tr>
@@ -495,7 +495,7 @@ public sealed interface Token {
              *         Types of inheritance
              *     </caption>
              *     <tr>
-             *         <th>Keyword</th>
+             *         <th>Reserved</th>
              *         <th>Inheritance rules</th>
              *     </tr>
              *     <tr>
@@ -551,27 +551,27 @@ public sealed interface Token {
             throw new UnsupportedOperationException("Don't instantiate Mapper");
         }
         
-        private static final List<KeywordKind> KEYWORD_KIND_LIST;
+        private static final List<Keyword> KEYWORD_LIST;
         private static final java.util.Map<Character, SymbolKind> BY_CHAR;
         
         static {
-            KEYWORD_KIND_LIST = new java.util.ArrayList<>();
-            KEYWORD_KIND_LIST.addAll(List.of(KeywordKind.Flow.values()));
+            KEYWORD_LIST = new java.util.ArrayList<>();
+            KEYWORD_LIST.addAll(List.of(Keyword.Flow.values()));
             
             /* Data kinds */
-            KEYWORD_KIND_LIST.addAll(List.of(KeywordKind.Data.Other.values()));
-            KEYWORD_KIND_LIST.addAll(List.of(KeywordKind.Data.Number.values()));
+            KEYWORD_LIST.addAll(List.of(Keyword.Data.Other.values()));
+            KEYWORD_LIST.addAll(List.of(Keyword.Data.Number.values()));
             
             /* Type kinds */
-            KEYWORD_KIND_LIST.addAll(List.of(KeywordKind.Type.Creation.values()));
-            KEYWORD_KIND_LIST.addAll(List.of(KeywordKind.Type.Listing.values()));
-            KEYWORD_KIND_LIST.addAll(List.of(KeywordKind.Type.Syntax.values()));
-            KEYWORD_KIND_LIST.addAll(List.of(KeywordKind.Type.Variable.values()));
+            KEYWORD_LIST.addAll(List.of(Keyword.Type.Creation.values()));
+            KEYWORD_LIST.addAll(List.of(Keyword.Type.Listing.values()));
+            KEYWORD_LIST.addAll(List.of(Keyword.Type.Syntax.values()));
+            KEYWORD_LIST.addAll(List.of(Keyword.Type.Variable.values()));
             
             /* Modifier kinds */
-            KEYWORD_KIND_LIST.addAll(List.of(KeywordKind.Modifier.Visibility.values()));
-            KEYWORD_KIND_LIST.addAll(List.of(KeywordKind.Modifier.Inheritance.values()));
-            KEYWORD_KIND_LIST.addAll(List.of(KeywordKind.Modifier.Dynamism.values()));
+            KEYWORD_LIST.addAll(List.of(Keyword.Modifier.Visibility.values()));
+            KEYWORD_LIST.addAll(List.of(Keyword.Modifier.Inheritance.values()));
+            KEYWORD_LIST.addAll(List.of(Keyword.Modifier.Dynamism.values()));
             
             BY_CHAR = Arrays.stream(SymbolKind.values())
                             .collect(java.util.stream.Collectors.toMap(k -> k.ch, k -> k));
@@ -595,15 +595,15 @@ public sealed interface Token {
          * @param token to be checked
          * @return a keyword token or the token given.
          * @see Token.Word
-         * @see Token.KeywordKind
+         * @see Keyword
          */
         public static Token classifyWord(Token token) {
             if (! (token instanceof Word(int start, String str))) {
                 return token;
             }
-            for (KeywordKind kk : KEYWORD_KIND_LIST) {
+            for (Keyword kk : KEYWORD_LIST) {
                 if (kk.text().equals(str)) {
-                    return new Token.Keyword(start, kk);
+                    return new Reserved(start, kk);
                 }
             }
             return token;

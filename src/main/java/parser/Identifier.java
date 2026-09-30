@@ -3,7 +3,7 @@ package parser;
 import java.util.List;
 
 /**
- * Allows the transformation from the Word tokens to Keyword tokens if they are such
+ * Allows the transformation from the Word tokens to Reserved tokens if they are such
  */
 public final class Identifier {
     private Identifier() {
@@ -11,7 +11,7 @@ public final class Identifier {
     }
     
     /**
-     * From the given list of tokens, the Word tokens get transformed into Keyword tokens if possible.
+     * From the given list of tokens, the Word tokens get transformed into Reserved tokens if possible.
      *
      * @param tokens that will be mapped
      * @return a new List with the tokens updated
