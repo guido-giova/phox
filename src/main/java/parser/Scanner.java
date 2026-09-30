@@ -105,19 +105,19 @@ public final class Scanner {
             this.consume();
         }
         
-        throw new IllegalArgumentException("Unterminated string starting at " + this.index);
+        throw new PhoxValidationException("Unterminated string starting", this.index);
     }
     
     private Token scanChar() {
         final int start = this.consume(); // skip opening quote
         
         if (this.index + 1 >= this.length) {
-            throw new IllegalArgumentException("Character literal never closed at " + this.index);
+            throw new PhoxValidationException("Character literal never closed", start);
         }
         
         char cc = text.charAt(this.index);
         if (cc == '\'') {
-            throw new IllegalArgumentException("Empty character literal at " + this.index);
+            throw new PhoxValidationException("Empty character literal", start);
         }
         
         if (cc == '\\') {
@@ -127,12 +127,12 @@ public final class Scanner {
         }
         
         if (this.index >= this.length) {
-            throw new IllegalArgumentException("Character literal never closed at " + this.index);
+            throw new PhoxValidationException("Character literal never closed", this.index);
         }
         
         char next = text.charAt(this.index);
         if (next != '\'') {
-            throw new IllegalArgumentException("Too many characters in character literal at " + this.index);
+            throw new PhoxValidationException("Too many characters in character literal", this.index);
         }
         
         this.consume();
@@ -141,7 +141,7 @@ public final class Scanner {
     
     private char scanEscapedCharacter() {
         if (this.index + 1 >= this.length) {
-            throw new IllegalArgumentException("Trailing escape character at " + this.index);
+            throw new PhoxValidationException("Trailing escape character", this.index);
         }
         char next = this.text.charAt(this.index + 1);
         char escaped;
@@ -154,13 +154,13 @@ public final class Scanner {
             case '\'' -> { this.index += 2; escaped = '\''; }
             case 'u'  -> {
                 if (this.index + 6 > this.length) {
-                    throw new IllegalArgumentException("Invalid Unicode escape at " + this.index);
+                    throw new PhoxValidationException("Invalid Unicode escape", this.index);
                 }
                 String hex = this.text.substring(this.index + 2, this.index + 6);
                 this.index += 6;
                 escaped = (char) Integer.parseInt(hex, 16);
             }
-            default -> throw new IllegalArgumentException("Unknown escape '\\" + next + "' at " + this.index);
+            default -> throw new PhoxValidationException("Unknown escape '\\" + next + "'", this.index);
         }
         return escaped;
     }
@@ -178,7 +178,7 @@ public final class Scanner {
             this.consume();
         }
         
-        throw new IllegalArgumentException("Unterminated comment starting at " + start);
+        throw new PhoxValidationException("Unterminated comment starting", start);
     }
     
     private Token scanNumber() {
