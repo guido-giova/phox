@@ -4,7 +4,7 @@ import utils.Chars;
 
 import java.util.List;
 
-public class Scanner {
+public final class Scanner {
     private final String text;
     private final int length;
     private int index;

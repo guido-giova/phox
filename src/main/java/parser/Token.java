@@ -301,8 +301,13 @@ public sealed interface Token {
             FLOAT64("float64")
             ;
             final String text;
-            Number(String text) {this.text = text;}
+            final String prefix;
+            Number(String text) {
+                this.text   = text;
+                this.prefix = text.charAt(0) + text.substring(text.length() - 2);
+            }
             @Override public String text() {return this.text;}
+            public String prefix() {return this.prefix;}
             
             /**
              * Informs if the given DataTypeKind represents a floating point number primitive.
@@ -322,6 +327,18 @@ public sealed interface Token {
              */
             public static boolean isInteger(DataTypeKind kind) {
                 return kind == INT32 || kind == INT64;
+            }
+            
+            /**
+             * Returns an Optional with the Number if found by given prefix.
+             *
+             * @param prefix that is being searched
+             * @return An Optional containing the Number's value if found, empty otherwise.
+             */
+            static Optional<Number> getByPrefix(String prefix) {
+                return java.util.Arrays.stream(Number.values())
+                                       .filter(e -> e.prefix.equals(prefix))
+                                       .findAny();
             }
         }
     }

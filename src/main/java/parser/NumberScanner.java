@@ -7,10 +7,9 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.Optional;
 
-public class NumberScanner {
+public final class NumberScanner extends TextScanner {
     private enum Base {
         HEXADECIMAL(16, 'x'),
         DECIMAL(10, 'd'),
@@ -51,11 +50,6 @@ public class NumberScanner {
     
     record NumberScannerResponse(Token.NumberLiteral.Unresolved token, int endIndex) {}
     
-    private final String text;
-    private final int length;
-    private final int beginIndex;
-    private int index;
-    
     private BigDecimal value;
     private Token.DataTypeKind.Number kind;
     private Token.DataTypeKind.Number desiredKind;
@@ -66,10 +60,7 @@ public class NumberScanner {
     private String exponentPart;
     
     private NumberScanner(String text, int beginIndex) {
-        this.text       = text;
-        this.length     = text.length();
-        this.beginIndex = beginIndex;
-        this.index      = beginIndex;
+        super(text, beginIndex);
         
         this.value        = null;
         this.kind         = null;
@@ -81,8 +72,6 @@ public class NumberScanner {
         this.exponentPart = null;
     }
     
-    private char getCurrent() {return this.text.charAt(this.index);}
-    
     private boolean isCurrentPeriod() {
         if (! this.hasCurrent()) { return false; }
         return this.getCurrent() == '.';
@@ -93,25 +82,7 @@ public class NumberScanner {
         return Exponent.getBySymbol(this.getCurrent());
     }
     
-    private static Optional<Token.DataTypeKind.Number> getByPrefix(String prefix) {
-        return Arrays.stream(Token.DataTypeKind.Number.values())
-                     .filter(e -> Objects.equals(e.text, prefix))
-                     .findFirst();
-    }
-    
-    private boolean hasCurrent() {return this.index < this.length;}
-    
     private boolean hasRun(int count) {return this.index + count <= this.length;}
-    
-    private int consume(int n) {
-        int lastIndex = this.index;
-        this.index += n;
-        return lastIndex;
-    }
-    
-    private int consume() {
-        return this.consume(1);
-    }
     
     static NumberScannerResponse scanNumber(String text, int beginIndex) {
         return new NumberScanner(text, beginIndex).scanNumber();
@@ -150,7 +121,7 @@ public class NumberScanner {
             
             String sign = "";
             if (Chars.isSignSymbol(this.getCurrent())) {
-                sign = Character.toString(this.getCurrent());
+                sign = this.getCurrentAsString();
                 this.consume();
             }
             this.exponentPart = sign + this.consumeDigitRun(Chars::isDecDigit);
@@ -158,7 +129,9 @@ public class NumberScanner {
         
         this.computeValue();
         this.resolveKind();
-        return new NumberScannerResponse(new Token.NumberLiteral.Unresolved(this.beginIndex, this.text, this.value, this.kind), this.index);
+        
+        Token.NumberLiteral.Unresolved numberLiteral = new Token.NumberLiteral.Unresolved(this.beginIndex, this.text.substring(this.beginIndex, this.index), this.value, this.kind);
+        return new NumberScannerResponse(numberLiteral, this.index);
     }
     
     private CharPredicate getPredicate() {
@@ -248,7 +221,7 @@ public class NumberScanner {
     
     private void checkForType() {
         if(! this.hasRun(3)) {return;}
-        Optional<Token.DataTypeKind.Number> chosenKind = NumberScanner.getByPrefix(this.text.substring(this.index, this.index + 3));
+        Optional<Token.DataTypeKind.Number> chosenKind = Token.DataTypeKind.Number.getByPrefix(this.text.substring(this.index, this.index + 3));
         if (chosenKind.isPresent()) {
             this.desiredKind = chosenKind.get();
             this.consume(3);
